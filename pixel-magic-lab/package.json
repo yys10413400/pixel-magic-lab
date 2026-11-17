@@ -1,0 +1,29 @@
+{
+  "name": "pixel-magic-lab",
+  "private": true,
+  "version": "1.0.0",
+  "description": "픽셀 마법사 연구소 — 초등학생을 위한 창작형 코딩 교육 웹앱",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build:html": "tsc --noEmit -p tsconfig.json && vite build --mode single"
+  },
+  "dependencies": {
+    "@fontsource/gowun-dodum": "^5.3.0",
+    "@fontsource/jua": "^5.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.0"
+  }
+}
