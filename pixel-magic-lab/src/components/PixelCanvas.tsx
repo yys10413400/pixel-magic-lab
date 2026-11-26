@@ -117,7 +117,9 @@ export function PixelCanvas(props: Props) {
       const checker = (x + y) % 2 === 0;
       cells.push(<rect key={'b' + i} x={x * C} y={y * C} width={C} height={C} className={checker ? 'cell-empty a' : 'cell-empty b'} />);
       if (!c && ghost && ghost[i]) {
-        cells.push(<rect key={'g' + i} x={x * C} y={y * C} width={C} height={C} fill={colorHex(ghost[i])} opacity={props.ghostOpacity ?? 0.32} />);
+        cells.push(
+          <rect key={'g' + i} x={x * C} y={y * C} width={C} height={C} fill={colorHex(ghost[i])} opacity={props.ghostOpacity ?? 0.32} />,
+        );
       }
       if (c) {
         cells.push(
@@ -168,7 +170,10 @@ export function PixelCanvas(props: Props) {
           // 칠하면 안 되는 칸 / 색이 다른 칸: X 표시
           <>
             <rect x={x * C + 0.8} y={y * C + 0.8} width={C - 1.6} height={C - 1.6} className="diff-box" />
-            <path d={`M${x * C + 2.6} ${y * C + 2.6}L${x * C + C - 2.6} ${y * C + C - 2.6}M${x * C + C - 2.6} ${y * C + 2.6}L${x * C + 2.6} ${y * C + C - 2.6}`} className="diff-x" />
+            <path
+              d={`M${x * C + 2.6} ${y * C + 2.6}L${x * C + C - 2.6} ${y * C + C - 2.6}M${x * C + C - 2.6} ${y * C + 2.6}L${x * C + 2.6} ${y * C + C - 2.6}`}
+              className="diff-x"
+            />
           </>
         ) : (
           // 칠해야 하는데 빈 칸: 점선 동그라미 + 원래 색 점
@@ -177,7 +182,9 @@ export function PixelCanvas(props: Props) {
             {d.expected && <circle cx={x * C + C / 2} cy={y * C + C / 2} r={1.5} fill={colorHex(d.expected)} />}
           </>
         )}
-        {has && d.expected && <circle cx={x * C + C - 2} cy={y * C + C - 2} r={1.5} fill={colorHex(d.expected)} stroke="#4a3a33" strokeWidth={0.4} />}
+        {has && d.expected && (
+          <circle cx={x * C + C - 2} cy={y * C + C - 2} r={1.5} fill={colorHex(d.expected)} stroke="#4a3a33" strokeWidth={0.4} />
+        )}
       </g>
     );
   });
@@ -205,7 +212,9 @@ export function PixelCanvas(props: Props) {
   return (
     <svg
       ref={svgRef}
-      className={'pixel-canvas ' + (props.className ?? '') + (interactive ? ' interactive' : '') + (props.cursor ? ' cur-' + props.cursor : '')}
+      className={
+        'pixel-canvas ' + (props.className ?? '') + (interactive ? ' interactive' : '') + (props.cursor ? ' cur-' + props.cursor : '')
+      }
       viewBox={`${-m} ${-m} ${vbW} ${vbH}`}
       preserveAspectRatio="xMidYMid meet"
       role="img"
@@ -251,7 +260,13 @@ export function PixelThumb({ grid, width, height, className }: { grid: Grid; wid
     rects.push(<rect key={i} x={i % width} y={Math.floor(i / width)} width={1.02} height={1.02} fill={colorHex(c)} />);
   }
   return (
-    <svg className={'pixel-thumb ' + (className ?? '')} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid meet" shapeRendering="crispEdges" aria-hidden>
+    <svg
+      className={'pixel-thumb ' + (className ?? '')}
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio="xMidYMid meet"
+      shapeRendering="crispEdges"
+      aria-hidden
+    >
       <rect width={width} height={height} className="thumb-bg" />
       {rects}
     </svg>

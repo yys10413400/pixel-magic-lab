@@ -11,7 +11,9 @@ function classicScript(): Plugin {
     apply: 'build',
     enforce: 'post',
     transformIndexHtml(html) {
-      return html.replace(/<script type="module" crossorigin src="([^"]+)"><\/script>/g, '<script defer src="$1"></script>').replace(/ crossorigin(?=[ >])/g, '');
+      return html
+        .replace(/<script type="module" crossorigin src="([^"]+)"><\/script>/g, '<script defer src="$1"></script>')
+        .replace(/ crossorigin(?=[ >])/g, '');
     },
   };
 }
@@ -70,8 +72,13 @@ export default defineConfig(({ mode }) => {
       },
     },
     test: {
-      environment: 'node',
-      include: ['tests/**/*.test.ts'],
+      projects: [
+        { extends: true, test: { name: 'unit', environment: 'node', include: ['tests/*.test.ts'] } },
+        {
+          extends: true,
+          test: { name: 'ui', environment: 'jsdom', include: ['tests/ui/**/*.test.tsx'], setupFiles: ['tests/ui/setup.ts'] },
+        },
+      ],
     },
   };
 });

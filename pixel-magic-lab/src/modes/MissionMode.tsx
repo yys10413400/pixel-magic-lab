@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { BlockEditor, BlockListView } from '../components/BlockEditor';
+import { BlockEditor } from '../components/blocks/BlockEditor';
+import { BlockListView } from '../components/blocks/BlockList';
 import { PixelCanvas, PixelThumb, type DiffMark } from '../components/PixelCanvas';
 import { RunControls, StatusBar, Modal, Stars, Stamp, type ConfirmState } from '../components/ui';
 import { Icon } from '../components/Icon';
@@ -31,7 +32,9 @@ interface SuccessInfo {
 }
 
 export function MissionMode({ active, progress, setProgress, speed, setSpeed, ask }: Props) {
-  const [missionId, setMissionId] = useState<number>(() => (MISSION_DATA.some((m) => m.id === progress.lastMission) ? progress.lastMission : 1));
+  const [missionId, setMissionId] = useState<number>(() =>
+    MISSION_DATA.some((m) => m.id === progress.lastMission) ? progress.lastMission : 1,
+  );
   const mission = getMission(missionId);
   const par = useMemo(() => countBlocks(parseProgram(mission.solution)), [mission]);
   const initialProgram = (id: number): Program => {
@@ -46,12 +49,15 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
   const [success, setSuccess] = useState<SuccessInfo | null>(null);
   const [burst, setBurst] = useState(0);
   const [mapOpen, setMapOpen] = useState(false);
-  const [concept, setConcept] = useState(false);
+  const [concept, setConcept] = useState(() => !!mission.concept && !progress.seenConcepts.includes(mission.id));
   const [hintLevel, setHintLevel] = useState(0);
   const [solutionOpen, setSolutionOpen] = useState(false);
   const [overlay, setOverlay] = useState(false);
 
-  const isUnlocked = useCallback((id: number) => progress.unlockAll || id === 1 || !!progress.missions[id - 1] || !!progress.missions[id], [progress]);
+  const isUnlocked = useCallback(
+    (id: number) => progress.unlockAll || id === 1 || !!progress.missions[id - 1] || !!progress.missions[id],
+    [progress],
+  );
 
   const onFinish = (r: RunResult) => {
     if (r.error) {
@@ -85,7 +91,15 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
       setFeedback({ kind: 'success', text: '목표 그림과 똑같아요! 마법 성공!' });
       setDiff(null);
       window.setTimeout(
-        () => setSuccess({ stars, blocks, par, best: !!prev && blocks < prev.bestBlocks, usedLoop: usesRepeat(program), newTitle: nt !== oldTitle ? nt : null }),
+        () =>
+          setSuccess({
+            stars,
+            blocks,
+            par,
+            best: !!prev && blocks < prev.bestBlocks,
+            usedLoop: usesRepeat(program),
+            newTitle: nt !== oldTitle ? nt : null,
+          }),
         700,
       );
     } else {
@@ -100,25 +114,14 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
     }
   };
 
-  const runner = useRunner({ width: mission.width, height: mission.height, program, speed, onFinish });
+  const runner = useRunner({ width: mission.width, height: mission.height, program, speed, onFinish, resetKey: missionId });
   const { view } = runner;
 
-  // 미션이 바뀌면 처음 상태로
-  useEffect(() => {
-    runner.reset();
-    setDiff(null);
-    setFeedback(null);
-    setHintLevel(0);
-    setOverlay(false);
-    if (mission.concept && !progress.seenConcepts.includes(mission.id)) setConcept(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [missionId]);
-
   // 다른 모드로 가면 실행 멈춤
+  const { pause } = runner;
   useEffect(() => {
-    if (!active && (view.status === 'running' || view.status === 'paused')) runner.pause();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active]);
+    if (!active && (view.status === 'running' || view.status === 'paused')) pause();
+  }, [active, view.status, pause]);
 
   const changeProgram = (p: Program) => {
     setProgram(p);
@@ -130,8 +133,15 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
 
   const goMission = (id: number) => {
     if (!isUnlocked(id)) return;
+    const next = getMission(id);
+    // 미션이 바뀌면 처음 상태로
     setMissionId(id);
     setProgram(initialProgram(id));
+    setDiff(null);
+    setFeedback(null);
+    setHintLevel(0);
+    setOverlay(false);
+    if (next.concept && !progress.seenConcepts.includes(id)) setConcept(true);
     setProgress((p) => ({ ...p, lastMission: id }));
     setMapOpen(false);
     setSuccess(null);
@@ -204,10 +214,24 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
             {record && <Stars n={record.stars} size={16} />}
           </div>
           <div className="m-nav">
-            <button type="button" className="btn-icon" disabled={mission.id === 1} onClick={() => goMission(mission.id - 1)} aria-label="이전 미션" title="이전 미션">
+            <button
+              type="button"
+              className="btn-icon"
+              disabled={mission.id === 1}
+              onClick={() => goMission(mission.id - 1)}
+              aria-label="이전 미션"
+              title="이전 미션"
+            >
               <Icon name="chevLeft" size={22} />
             </button>
-            <button type="button" className="btn-icon" disabled={!hasNext || !isUnlocked(nextId)} onClick={() => goMission(nextId)} aria-label="다음 미션" title={hasNext && !isUnlocked(nextId) ? '이 미션을 성공하면 열려요' : '다음 미션'}>
+            <button
+              type="button"
+              className="btn-icon"
+              disabled={!hasNext || !isUnlocked(nextId)}
+              onClick={() => goMission(nextId)}
+              aria-label="다음 미션"
+              title={hasNext && !isUnlocked(nextId) ? '이 미션을 성공하면 열려요' : '다음 미션'}
+            >
               <Icon name={hasNext && !isUnlocked(nextId) ? 'lock' : 'chevRight'} size={22} />
             </button>
           </div>
@@ -309,8 +333,8 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
             <p className="hint-empty">막히면 힌트를 하나씩 열어 보세요.</p>
           ) : (
             <ol className="hints">
-              {mission.hints.slice(0, hintLevel).map((h, i) => (
-                <li key={i}>{h}</li>
+              {mission.hints.slice(0, hintLevel).map((h) => (
+                <li key={h}>{h}</li>
               ))}
             </ol>
           )}
@@ -318,7 +342,13 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
       </aside>
 
       {/* 미션 지도 */}
-      <Modal open={mapOpen} onClose={() => setMapOpen(false)} title="미션 지도" className="mission-map" icon={<Icon name="map" size={24} />}>
+      <Modal
+        open={mapOpen}
+        onClose={() => setMapOpen(false)}
+        title="미션 지도"
+        className="mission-map"
+        icon={<Icon name="map" size={24} />}
+      >
         {(['easy', 'normal', 'challenge'] as Difficulty[]).map((d) => (
           <div className="map-group" key={d}>
             <h3>
@@ -329,7 +359,13 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
                 const r = progress.missions[m.id];
                 const open = isUnlocked(m.id);
                 return (
-                  <button type="button" key={m.id} className={'map-card' + (open ? '' : ' locked') + (m.id === mission.id ? ' current' : '') + (r ? ' done' : '')} disabled={!open} onClick={() => goMission(m.id)}>
+                  <button
+                    type="button"
+                    key={m.id}
+                    className={'map-card' + (open ? '' : ' locked') + (m.id === mission.id ? ' current' : '') + (r ? ' done' : '')}
+                    disabled={!open}
+                    onClick={() => goMission(m.id)}
+                  >
                     <span className="mc-thumb">
                       <PixelThumb grid={m.target} width={m.width} height={m.height} />
                       {!open && (
@@ -459,12 +495,15 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
 function SparkleBurst() {
   const pts = Array.from({ length: 12 }, (_, i) => {
     const a = (i / 12) * Math.PI * 2;
-    return { x: Math.cos(a), y: Math.sin(a), d: (i % 3) * 0.08, c: ['#ffd85e', '#f59cc1', '#a68be0', '#7fd8c8'][i % 4] };
+    return { id: `star-${i}`, x: Math.cos(a), y: Math.sin(a), d: (i % 3) * 0.08, c: ['#ffd85e', '#f59cc1', '#a68be0', '#7fd8c8'][i % 4] };
   });
   return (
     <div className="burst" aria-hidden>
-      {pts.map((p, i) => (
-        <span key={i} style={{ '--dx': `${p.x * 150}px`, '--dy': `${p.y * 150}px`, animationDelay: `${p.d}s`, color: p.c } as React.CSSProperties}>
+      {pts.map((p) => (
+        <span
+          key={p.id}
+          style={{ '--dx': `${p.x * 150}px`, '--dy': `${p.y * 150}px`, animationDelay: `${p.d}s`, color: p.c } as React.CSSProperties}
+        >
           <Icon name="star" size={26} />
         </span>
       ))}
@@ -487,7 +526,10 @@ function ConceptArt({ id }: { id: number }) {
   const rows = arts[id];
   if (!rows) return null;
   const w = rows[0].length;
-  const grid = rows.join('').split('').map((c) => (c === '.' ? null : c));
+  const grid = rows
+    .join('')
+    .split('')
+    .map((c) => (c === '.' ? null : c));
   return (
     <div className="concept-art">
       <PixelThumb grid={grid} width={w} height={rows.length} />

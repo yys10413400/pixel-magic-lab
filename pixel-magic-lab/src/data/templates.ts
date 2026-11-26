@@ -47,10 +47,34 @@ const dino1 = [...dinoTop, '..G.G...', 'NNNNNNNN'];
 const dino2 = [...dinoTop, '.G...G..', 'NNNNNNNN'];
 
 export const TEMPLATES: AnimTemplate[] = [
-  { key: 'cat', name: '눈 깜빡이는 고양이', desc: '눈을 감았다 뜨는 2장 그림', fps: 4, frames: [{ rows: catOpen }, { rows: catOpen }, { rows: catShut }, { rows: catOpen }] },
-  { key: 'bunny', name: '통통 뛰는 토끼', desc: '위로 올라갔다 내려오는 토끼', fps: 4, frames: [{ rows: bunny(0) }, { rows: bunny(1) }, { rows: bunny(2) }, { rows: bunny(1) }] },
-  { key: 'star', name: '반짝이는 별', desc: '작아졌다 커지는 별빛', fps: 4, frames: [{ rows: star.small }, { rows: star.mid }, { rows: star.big }, { rows: star.mid }] },
-  { key: 'flower', name: '피어나는 꽃', desc: '새싹 → 꽃봉오리 → 활짝', fps: 2, frames: [{ rows: flower.sprout }, { rows: flower.bud }, { rows: flower.bloom }, { rows: flower.bloom }] },
+  {
+    key: 'cat',
+    name: '눈 깜빡이는 고양이',
+    desc: '눈을 감았다 뜨는 2장 그림',
+    fps: 4,
+    frames: [{ rows: catOpen }, { rows: catOpen }, { rows: catShut }, { rows: catOpen }],
+  },
+  {
+    key: 'bunny',
+    name: '통통 뛰는 토끼',
+    desc: '위로 올라갔다 내려오는 토끼',
+    fps: 4,
+    frames: [{ rows: bunny(0) }, { rows: bunny(1) }, { rows: bunny(2) }, { rows: bunny(1) }],
+  },
+  {
+    key: 'star',
+    name: '반짝이는 별',
+    desc: '작아졌다 커지는 별빛',
+    fps: 4,
+    frames: [{ rows: star.small }, { rows: star.mid }, { rows: star.big }, { rows: star.mid }],
+  },
+  {
+    key: 'flower',
+    name: '피어나는 꽃',
+    desc: '새싹 → 꽃봉오리 → 활짝',
+    fps: 2,
+    frames: [{ rows: flower.sprout }, { rows: flower.bud }, { rows: flower.bloom }, { rows: flower.bloom }],
+  },
   { key: 'dino', name: '걷는 공룡', desc: '다리를 번갈아 움직이는 공룡', fps: 4, frames: [{ rows: dino1 }, { rows: dino2 }] },
   {
     key: 'ball',

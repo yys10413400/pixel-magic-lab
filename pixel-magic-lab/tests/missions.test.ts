@@ -43,13 +43,13 @@ describe('미션 데이터', () => {
       it('정답 예시 블록 수로 별 3개를 받을 수 있다', () => {
         expect(starsFor(countBlocks(solution), countBlocks(solution))).toBe(3);
       });
+    });
+  }
 
-      if (m.starter) {
-        it('디버깅 미션의 처음 코드는 목표와 다르다 (고칠 거리가 있다)', () => {
-          const r = runProgram(parseProgram(m.starter!), { width: m.width, height: m.height });
-          expect(r.error !== undefined || !gridsEqual(r.finalGrid, m.target)).toBe(true);
-        });
-      }
+  for (const m of MISSION_DATA.filter((x) => x.starter)) {
+    it(`디버깅 미션 ${m.id}: 처음 코드는 목표와 다르다 (고칠 거리가 있다)`, () => {
+      const r = runProgram(parseProgram(m.starter!), { width: m.width, height: m.height });
+      expect(r.error !== undefined || !gridsEqual(r.finalGrid, m.target)).toBe(true);
     });
   }
 

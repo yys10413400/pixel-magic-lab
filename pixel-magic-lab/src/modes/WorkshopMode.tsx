@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { Studio, renderArt, resizeGrid } from '../components/Studio';
 import { Icon } from '../components/Icon';
 import { Modal, type ConfirmState } from '../components/ui';
@@ -6,7 +6,17 @@ import { PixelThumb } from '../components/PixelCanvas';
 import { emptyGrid } from '../engine/interpreter';
 import { countBlocks, uid, cloneProgram } from '../engine/program';
 import type { Grid, Program } from '../engine/types';
-import { CANVAS_SIZES, deleteWork, formatDate, loadWorkshopDraft, loadWorks, saveWorkshopDraft, upsertWork, type Artwork, type SpeedKey } from '../lib/storage';
+import {
+  CANVAS_SIZES,
+  deleteWork,
+  formatDate,
+  loadWorkshopDraft,
+  loadWorks,
+  saveWorkshopDraft,
+  upsertWork,
+  type Artwork,
+  type SpeedKey,
+} from '../lib/storage';
 import { exportPng } from '../lib/exporters';
 import { play } from '../lib/sound';
 import type { ModeHandle } from '../App';
@@ -40,7 +50,9 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
   const [toast, setToast] = useState<string | null>(null);
   const [resetKey, setResetKey] = useState('w0');
   const snapRef = useRef<Snap>({ size, program, base });
-  snapRef.current = { size, program, base };
+  useLayoutEffect(() => {
+    snapRef.current = { size, program, base };
+  });
 
   // 새로고침해도 이어서 만들 수 있게 임시 저장
   useEffect(() => {
@@ -108,9 +120,22 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
   const save = (): boolean => {
     const id = savedId ?? uid();
     const finalName = name.trim() || `나의 작품 ${loadWorks().length + 1}`;
-    const art: Artwork = { id, name: finalName, size, program: cloneProgram(program), base: [...base], pixels: renderArt(program, base, size), updatedAt: Date.now() };
+    const art: Artwork = {
+      id,
+      name: finalName,
+      size,
+      program: cloneProgram(program),
+      base: [...base],
+      pixels: renderArt(program, base, size),
+      updatedAt: Date.now(),
+    };
     if (!upsertWork(art)) {
-      ask({ title: '저장하지 못했어요', message: '브라우저 저장 공간이 가득 찼거나 저장이 막혀 있어요. 오래된 작품을 지우거나 PNG로 내려받아 보관해 주세요.', confirmText: '확인', onConfirm: () => {} });
+      ask({
+        title: '저장하지 못했어요',
+        message: '브라우저 저장 공간이 가득 찼거나 저장이 막혀 있어요. 오래된 작품을 지우거나 PNG로 내려받아 보관해 주세요.',
+        confirmText: '확인',
+        onConfirm: () => {},
+      });
       return false;
     }
     setSavedId(id);
@@ -121,7 +146,10 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
     return true;
   };
 
-  handleRef.current = { isDirty: () => dirty, save };
+  // App 이 모드를 바꾸기 전에 '저장 안 한 변경'을 물어볼 수 있게 알려줘요
+  useLayoutEffect(() => {
+    handleRef.current = { isDirty: () => dirty, save };
+  });
 
   const startNew = () => {
     const go = () => {
@@ -134,7 +162,15 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
       setDirty(false);
       setResetKey(uid());
     };
-    if (dirty) ask({ title: '새 작품을 만들까요?', message: '저장하지 않은 지금 작품은 사라져요.', confirmText: '새로 만들기', danger: true, onConfirm: go, extra: { text: '저장하고 새로 만들기', onClick: () => save() && go() } });
+    if (dirty)
+      ask({
+        title: '새 작품을 만들까요?',
+        message: '저장하지 않은 지금 작품은 사라져요.',
+        confirmText: '새로 만들기',
+        danger: true,
+        onConfirm: go,
+        extra: { text: '저장하고 새로 만들기', onClick: () => save() && go() },
+      });
     else go();
   };
 
@@ -152,7 +188,14 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
       setGalleryOpen(false);
       play('click');
     };
-    if (dirty) ask({ title: '작품을 불러올까요?', message: '저장하지 않은 지금 작품은 사라져요.', confirmText: '불러오기', danger: true, onConfirm: go });
+    if (dirty)
+      ask({
+        title: '작품을 불러올까요?',
+        message: '저장하지 않은 지금 작품은 사라져요.',
+        confirmText: '불러오기',
+        danger: true,
+        onConfirm: go,
+      });
     else go();
   };
 
@@ -235,11 +278,24 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
             </span>
             <label className="name-field">
               <span>작품 이름</span>
-              <input value={name} maxLength={30} placeholder="예: 웃는 고양이" onChange={(e) => (setName(e.target.value), setDirty(true))} />
+              <input
+                aria-label="작품 이름"
+                value={name}
+                maxLength={30}
+                placeholder="예: 웃는 고양이"
+                onChange={(e) => (setName(e.target.value), setDirty(true))}
+              />
             </label>
             <div className="seg size-seg" role="radiogroup" aria-label="도화지 크기">
               {CANVAS_SIZES.map((n) => (
-                <button type="button" role="radio" aria-checked={size === n} key={n} className={size === n ? 'on' : ''} onClick={() => changeSize(n)}>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={size === n}
+                  key={n}
+                  className={size === n ? 'on' : ''}
+                  onClick={() => changeSize(n)}
+                >
                   {n}×{n}
                 </button>
               ))}
@@ -274,7 +330,9 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
               <Icon name="redo" size={18} /> 다시하기
             </button>
           </div>
-          <p className={'save-state' + (dirty ? ' dirty' : '')}>{dirty ? '저장하지 않은 변경이 있어요' : savedId ? '작품 보관함에 저장됨' : '아직 비어 있는 새 작품'}</p>
+          <p className={'save-state' + (dirty ? ' dirty' : '')}>
+            {dirty ? '저장하지 않은 변경이 있어요' : savedId ? '작품 보관함에 저장됨' : '아직 비어 있는 새 작품'}
+          </p>
         </div>
         <div className="side-sec art-info">
           <h3>
@@ -304,7 +362,13 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
         {toast && <div className="side-toast">{toast}</div>}
       </aside>
 
-      <Modal open={galleryOpen} onClose={() => setGalleryOpen(false)} title="작품 보관함" className="gallery" icon={<Icon name="folder" size={24} />}>
+      <Modal
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        title="작품 보관함"
+        className="gallery"
+        icon={<Icon name="folder" size={24} />}
+      >
         {works.length === 0 ? (
           <div className="empty-gallery">
             <Icon name="sparkle" size={36} />

@@ -45,8 +45,7 @@ export function RunControls(p: RunControlsProps) {
         {main.label}
       </button>
       <button type="button" className="btn-ctl" onClick={p.onStep} title="명령을 하나씩 실행해요">
-        <Icon name="step" size={20} />
-        한 단계
+        <Icon name="step" size={20} />한 단계
       </button>
       <button type="button" className="btn-ctl" onClick={p.onRun} title="도화지를 비우고 처음부터 다시 실행해요">
         <Icon name="restart" size={20} />
@@ -59,7 +58,14 @@ export function RunControls(p: RunControlsProps) {
       <div className="speed" role="radiogroup" aria-label="실행 속도">
         <span className="speed-label">속도</span>
         {(['slow', 'normal', 'fast', 'instant'] as SpeedKey[]).map((s) => (
-          <button type="button" key={s} role="radio" aria-checked={p.speed === s} className={p.speed === s ? 'on' : ''} onClick={() => p.onSpeed(s)}>
+          <button
+            type="button"
+            key={s}
+            role="radio"
+            aria-checked={p.speed === s}
+            className={p.speed === s ? 'on' : ''}
+            onClick={() => p.onSpeed(s)}
+          >
             {SPEED_LABEL[s]}
           </button>
         ))}
@@ -69,7 +75,12 @@ export function RunControls(p: RunControlsProps) {
 }
 
 export function StatusBar({ view, extra }: { view: RunnerView; extra?: ReactNode }) {
-  const msg = view.current && view.status !== 'idle' ? describeStep(view.current) : view.stale ? '코드가 바뀌었어요. 실행해서 확인해 봐요!' : '실행 버튼을 누르면 마법 펜이 움직여요';
+  const msg =
+    view.current && view.status !== 'idle'
+      ? describeStep(view.current)
+      : view.stale
+        ? '코드가 바뀌었어요. 실행해서 확인해 봐요!'
+        : '실행 버튼을 누르면 마법 펜이 움직여요';
   return (
     <div className={'status-bar st-' + view.status} aria-live="polite">
       <span className="st-chip">{STATUS_TEXT[view.status]}</span>

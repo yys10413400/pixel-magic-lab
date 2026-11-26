@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useLayoutEffect } from 'react';
 import { Studio, renderArt, resizeGrid } from '../components/Studio';
 import { Icon } from '../components/Icon';
 import { Modal, type ConfirmState } from '../components/ui';
@@ -6,7 +6,18 @@ import { PixelThumb } from '../components/PixelCanvas';
 import { emptyGrid } from '../engine/interpreter';
 import { cloneProgram, countBlocks, uid } from '../engine/program';
 import type { Grid, Program } from '../engine/types';
-import { CANVAS_SIZES, deleteAnim, formatDate, loadAnims, loadTheaterDraft, saveTheaterDraft, upsertAnim, type AnimFrame, type AnimProject, type SpeedKey } from '../lib/storage';
+import {
+  CANVAS_SIZES,
+  deleteAnim,
+  formatDate,
+  loadAnims,
+  loadTheaterDraft,
+  saveTheaterDraft,
+  upsertAnim,
+  type AnimFrame,
+  type AnimProject,
+  type SpeedKey,
+} from '../lib/storage';
 import { exportGif, exportSpriteSheet } from '../lib/exporters';
 import { TEMPLATES, blankProject, projectFromTemplate } from '../data/templates';
 import { play } from '../lib/sound';
@@ -78,11 +89,14 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
     setDirty(true);
   };
 
-  const setFrame = (patch: Partial<AnimFrame>) => update((p) => ({ ...p, frames: p.frames.map((f, i) => (i === index ? { ...f, ...patch } : f)) }));
+  const setFrame = (patch: Partial<AnimFrame>) =>
+    update((p) => ({ ...p, frames: p.frames.map((f, i) => (i === index ? { ...f, ...patch } : f)) }));
 
   const addFrame = (copy: boolean) => {
     if (frames.length >= MAX_FRAMES) return showToast(`장면은 ${MAX_FRAMES}장까지 만들 수 있어요`);
-    const nf: AnimFrame = copy ? { id: uid(), program: cloneProgram(frame.program), base: [...frame.base] } : { id: uid(), program: [], base: emptyGrid(size, size) };
+    const nf: AnimFrame = copy
+      ? { id: uid(), program: cloneProgram(frame.program), base: [...frame.base] }
+      : { id: uid(), program: [], base: emptyGrid(size, size) };
     update((p) => ({ ...p, frames: [...p.frames.slice(0, index + 1), nf, ...p.frames.slice(index + 1)] }));
     setCur(index + 1);
     play('add');
@@ -125,7 +139,12 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
     const name = project.name.trim() || `나의 애니메이션 ${loadAnims().length + 1}`;
     const p: AnimProject = { ...project, id, name, updatedAt: Date.now() };
     if (!upsertAnim(p)) {
-      ask({ title: '저장하지 못했어요', message: '브라우저 저장 공간이 부족해요. 오래된 애니메이션을 지우거나 GIF로 내려받아 보관해 주세요.', confirmText: '확인', onConfirm: () => {} });
+      ask({
+        title: '저장하지 못했어요',
+        message: '브라우저 저장 공간이 부족해요. 오래된 애니메이션을 지우거나 GIF로 내려받아 보관해 주세요.',
+        confirmText: '확인',
+        onConfirm: () => {},
+      });
       return false;
     }
     setProject(p);
@@ -136,7 +155,10 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
     return true;
   };
 
-  handleRef.current = { isDirty: () => dirty, save };
+  // App 이 모드를 바꾸기 전에 '저장 안 한 변경'을 물어볼 수 있게 알려줘요
+  useLayoutEffect(() => {
+    handleRef.current = { isDirty: () => dirty, save };
+  });
 
   const replaceProject = (p: AnimProject, saved: string | null) => {
     const go = () => {
@@ -150,7 +172,15 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
       setTplOpen(false);
       play('click');
     };
-    if (dirty) ask({ title: '지금 애니메이션을 바꿀까요?', message: '저장하지 않은 지금 애니메이션은 사라져요.', confirmText: '바꾸기', danger: true, onConfirm: go, extra: { text: '저장하고 바꾸기', onClick: () => save() && go() } });
+    if (dirty)
+      ask({
+        title: '지금 애니메이션을 바꿀까요?',
+        message: '저장하지 않은 지금 애니메이션은 사라져요.',
+        confirmText: '바꾸기',
+        danger: true,
+        onConfirm: go,
+        extra: { text: '저장하고 바꾸기', onClick: () => save() && go() },
+      });
     else go();
   };
 
@@ -221,7 +251,14 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
             </label>
             <div className="seg size-seg" role="radiogroup" aria-label="도화지 크기">
               {CANVAS_SIZES.map((n) => (
-                <button type="button" role="radio" aria-checked={size === n} key={n} className={size === n ? 'on' : ''} onClick={() => changeSize(n)}>
+                <button
+                  type="button"
+                  role="radio"
+                  aria-checked={size === n}
+                  key={n}
+                  className={size === n ? 'on' : ''}
+                  onClick={() => changeSize(n)}
+                >
                   {n}×{n}
                 </button>
               ))}
@@ -261,7 +298,14 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
           </div>
           <div className="seg fps-seg" role="radiogroup" aria-label="재생 속도">
             {FPS_OPTIONS.map((o) => (
-              <button type="button" role="radio" aria-checked={project.fps === o.fps} key={o.fps} className={project.fps === o.fps ? 'on' : ''} onClick={() => update((p) => ({ ...p, fps: o.fps }))}>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={project.fps === o.fps}
+                key={o.fps}
+                className={project.fps === o.fps ? 'on' : ''}
+                onClick={() => update((p) => ({ ...p, fps: o.fps }))}
+              >
                 {o.label}
               </button>
             ))}
@@ -270,7 +314,13 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
         <div className="side-sec">
           <label className="name-field full">
             <span>애니메이션 이름</span>
-            <input value={project.name} maxLength={30} placeholder="예: 춤추는 고양이" onChange={(e) => update((p) => ({ ...p, name: e.target.value }))} />
+            <input
+              aria-label="애니메이션 이름"
+              value={project.name}
+              maxLength={30}
+              placeholder="예: 춤추는 고양이"
+              onChange={(e) => update((p) => ({ ...p, name: e.target.value }))}
+            />
           </label>
           <div className="btn-grid">
             <button type="button" className="btn btn-primary" onClick={save}>
@@ -296,7 +346,9 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
               <Icon name="film" size={18} /> 장면 모음 PNG
             </button>
           </div>
-          <p className={'save-state' + (dirty ? ' dirty' : '')}>{dirty ? '저장하지 않은 변경이 있어요' : savedId ? '보관함에 저장됨' : ''}</p>
+          <p className={'save-state' + (dirty ? ' dirty' : '')}>
+            {dirty ? '저장하지 않은 변경이 있어요' : savedId ? '보관함에 저장됨' : ''}
+          </p>
         </div>
         {toast && <div className="side-toast">{toast}</div>}
       </aside>
@@ -307,13 +359,34 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
             <Icon name="film" size={18} /> {index + 1}번 장면
           </span>
           <div className="fs-btns">
-            <button type="button" className="btn-mini" onClick={() => moveFrame(-1)} disabled={index === 0} title="이 장면을 앞으로 옮기기" aria-label="이 장면을 앞으로 옮기기">
+            <button
+              type="button"
+              className="btn-mini"
+              onClick={() => moveFrame(-1)}
+              disabled={index === 0}
+              title="이 장면을 앞으로 옮기기"
+              aria-label="이 장면을 앞으로 옮기기"
+            >
               <Icon name="chevLeft" size={18} />
             </button>
-            <button type="button" className="btn-mini" onClick={() => moveFrame(1)} disabled={index === frames.length - 1} title="이 장면을 뒤로 옮기기" aria-label="이 장면을 뒤로 옮기기">
+            <button
+              type="button"
+              className="btn-mini"
+              onClick={() => moveFrame(1)}
+              disabled={index === frames.length - 1}
+              title="이 장면을 뒤로 옮기기"
+              aria-label="이 장면을 뒤로 옮기기"
+            >
               <Icon name="chevRight" size={18} />
             </button>
-            <button type="button" className="btn-mini danger" onClick={deleteFrame} disabled={frames.length <= 1} title="이 장면 지우기" aria-label="이 장면 지우기">
+            <button
+              type="button"
+              className="btn-mini danger"
+              onClick={deleteFrame}
+              disabled={frames.length <= 1}
+              title="이 장면 지우기"
+              aria-label="이 장면 지우기"
+            >
               <Icon name="trash" size={17} />
             </button>
           </div>
@@ -321,7 +394,13 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
         </div>
         <div className="fs-list">
           {frames.map((f, i) => (
-            <button type="button" key={f.id} className={'fs-item' + (i === index ? ' on' : '') + (playing && i === shownPlay ? ' playing' : '')} onClick={() => setCur(i)} aria-label={`${i + 1}번 장면`}>
+            <button
+              type="button"
+              key={f.id}
+              className={'fs-item' + (i === index ? ' on' : '') + (playing && i === shownPlay ? ' playing' : '')}
+              onClick={() => setCur(i)}
+              aria-label={`${i + 1}번 장면`}
+            >
               <PixelThumb grid={rendered[i]} width={size} height={size} />
               <span className="fs-num">{i + 1}</span>
               {countBlocks(f.program) > 0 && (
@@ -341,7 +420,13 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
         </div>
       </section>
 
-      <Modal open={tplOpen} onClose={() => setTplOpen(false)} title="새 애니메이션 만들기" className="templates" icon={<Icon name="new" size={24} />}>
+      <Modal
+        open={tplOpen}
+        onClose={() => setTplOpen(false)}
+        title="새 애니메이션 만들기"
+        className="templates"
+        icon={<Icon name="new" size={24} />}
+      >
         <p className="note">예시 템플릿으로 시작해서 고쳐 보거나, 빈 도화지로 시작하세요.</p>
         <div className="tpl-grid">
           <button type="button" className="tpl-card blank" onClick={() => replaceProject(blankProject(size), null)}>
@@ -357,7 +442,13 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
         </div>
       </Modal>
 
-      <Modal open={galleryOpen} onClose={() => setGalleryOpen(false)} title="애니메이션 보관함" className="gallery" icon={<Icon name="folder" size={24} />}>
+      <Modal
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        title="애니메이션 보관함"
+        className="gallery"
+        icon={<Icon name="folder" size={24} />}
+      >
         {anims.length === 0 ? (
           <div className="empty-gallery">
             <Icon name="sparkle" size={36} />

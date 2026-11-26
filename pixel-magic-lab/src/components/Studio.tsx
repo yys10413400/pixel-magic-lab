@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { BlockEditor } from './BlockEditor';
+import { BlockEditor } from './blocks/BlockEditor';
 import { PixelCanvas } from './PixelCanvas';
 import { RunControls, StatusBar } from './ui';
 import { Icon } from './Icon';
@@ -45,18 +45,22 @@ export function Studio(p: Props) {
 
   const start = centerOf(p.size, p.size);
   const live = useMemo(() => runStudio(p.program, p.base, p.size), [p.program, p.base, p.size]);
-  const runner = useRunner({ width: p.size, height: p.size, base: p.base, program: p.program, speed: p.speed, startX: start.x, startY: start.y });
+  const runner = useRunner({
+    width: p.size,
+    height: p.size,
+    base: p.base,
+    program: p.program,
+    speed: p.speed,
+    startX: start.x,
+    startY: start.y,
+    resetKey: `${p.resetKey}:${p.size}`,
+  });
   const { view } = runner;
 
+  const { pause } = runner;
   useEffect(() => {
-    runner.reset();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [p.resetKey, p.size]);
-
-  useEffect(() => {
-    if (!p.active && (view.status === 'running' || view.status === 'paused')) runner.pause();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [p.active]);
+    if (!p.active && (view.status === 'running' || view.status === 'paused')) pause();
+  }, [p.active, view.status, pause]);
 
   const running = view.status === 'running' || view.status === 'paused';
   // 실행하지 않을 때는 지금 코드의 결과를 바로 보여줘요 (실행하면 그리는 과정을 볼 수 있어요)
@@ -106,25 +110,56 @@ export function Studio(p: Props) {
         <div className="stage-head">{p.stageHead}</div>
         <div className="tool-row">
           <div className="seg" role="radiogroup" aria-label="그리기 방법">
-            <button type="button" role="radio" aria-checked={tool === 'code'} className={tool === 'code' ? 'on' : ''} onClick={() => setTool('code')}>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={tool === 'code'}
+              className={tool === 'code' ? 'on' : ''}
+              onClick={() => setTool('code')}
+            >
               <Icon name="code" size={18} /> 코드로 그리기
             </button>
-            <button type="button" role="radio" aria-checked={tool === 'brush'} className={tool === 'brush' ? 'on' : ''} onClick={() => setTool('brush')} title="손으로 칠한 칸은 '밑그림'이 되고, 코드는 그 위에 그려져요">
+            <button
+              type="button"
+              role="radio"
+              aria-checked={tool === 'brush'}
+              className={tool === 'brush' ? 'on' : ''}
+              onClick={() => setTool('brush')}
+              title="손으로 칠한 칸은 '밑그림'이 되고, 코드는 그 위에 그려져요"
+            >
               <Icon name="hand" size={18} /> 손으로 칠하기
             </button>
-            <button type="button" role="radio" aria-checked={tool === 'eraser'} className={tool === 'eraser' ? 'on' : ''} onClick={() => setTool('eraser')}>
+            <button
+              type="button"
+              role="radio"
+              aria-checked={tool === 'eraser'}
+              className={tool === 'eraser' ? 'on' : ''}
+              onClick={() => setTool('eraser')}
+            >
               <Icon name="eraser" size={18} /> 손 지우개
             </button>
           </div>
           {tool === 'brush' ? (
             <div className="hand-palette" role="listbox" aria-label="손 그림 물감">
               {PALETTE.map((c) => (
-                <button type="button" key={c.key} className={'hp-sw' + (handColor === c.key ? ' on' : '')} style={{ background: c.hex }} title={c.name} aria-label={c.name} onClick={() => setHandColor(c.key)} />
+                <button
+                  type="button"
+                  key={c.key}
+                  className={'hp-sw' + (handColor === c.key ? ' on' : '')}
+                  style={{ background: c.hex }}
+                  title={c.name}
+                  aria-label={c.name}
+                  onClick={() => setHandColor(c.key)}
+                />
               ))}
             </div>
           ) : (
             <span className="tool-tip">
-              {tool === 'code' ? (live.error ? '실행하면 멈추는 블록이 있어요. ▶ 실행해서 찾아봐요!' : '도화지에는 지금 코드의 결과가 보여요') : '칸을 눌러 손 그림을 지워요'}
+              {tool === 'code'
+                ? live.error
+                  ? '실행하면 멈추는 블록이 있어요. ▶ 실행해서 찾아봐요!'
+                  : '도화지에는 지금 코드의 결과가 보여요'
+                : '칸을 눌러 손 그림을 지워요'}
             </span>
           )}
         </div>
@@ -134,7 +169,11 @@ export function Studio(p: Props) {
             height={p.size}
             grid={shown}
             axes
-            pen={handMode ? null : { x: view.x, y: view.y, color: view.color, mode: view.status === 'error' ? 'error' : running ? 'active' : 'idle' }}
+            pen={
+              handMode
+                ? null
+                : { x: view.x, y: view.y, color: view.color, mode: view.status === 'error' ? 'error' : running ? 'active' : 'idle' }
+            }
             errorTarget={view.status === 'error' ? view.error?.target : null}
             ghost={p.ghost}
             ghostOpacity={0.3}
@@ -181,7 +220,7 @@ export function runStudio(program: Program, base: Grid, size: number) {
 
 /** 캔버스 크기 변경: 왼쪽 위 기준으로 자르거나 늘림 */
 export function resizeGrid(g: Grid, from: number, to: number): Grid {
-  const out: Grid = new Array(to * to).fill(null);
+  const out: Grid = Array.from({ length: to * to }, (): ColorKey | null => null);
   for (let y = 0; y < Math.min(from, to); y++) for (let x = 0; x < Math.min(from, to); x++) out[y * to + x] = g[y * from + x] ?? null;
   return out;
 }

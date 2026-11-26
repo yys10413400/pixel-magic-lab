@@ -1,10 +1,12 @@
 import type { Grid, Program } from '../engine/types';
 import { sanitizeProgram, uid } from '../engine/program';
 import { isColorKey } from '../engine/palette';
+import { migrateProgram, schemaOf, SCHEMA } from './migrations';
 
 // ─────────────────────────────────────────────
 // 브라우저 로컬 저장소 (서버 없이 작품 보관)
 // 모든 읽기/쓰기는 실패해도 앱이 멈추지 않도록 감쌉니다.
+// 공방 작품·애니메이션·임시 저장에는 schema 번호를 붙이고, 예전 데이터는 읽을 때 바꿔서 다시 저장해요 (migrations.ts).
 // ─────────────────────────────────────────────
 
 const KEYS = {
@@ -36,7 +38,7 @@ function write(key: string, value: unknown): boolean {
 }
 
 export function sanitizeGrid(raw: unknown, size: number): Grid {
-  const out: Grid = new Array(size).fill(null);
+  const out: Grid = Array.from({ length: size }, (): string | null => null);
   if (!Array.isArray(raw)) return out;
   for (let i = 0; i < size; i++) {
     const c = raw[i];
@@ -125,31 +127,56 @@ export interface Artwork {
   pixels: Grid; // 완성 그림 (밑그림 + 코드 실행 결과)
   updatedAt: number;
 }
-function sanitizeArtwork(raw: unknown): Artwork | null {
+/** 저장 칸에 쓸 모양 (schema 번호 붙이기) */
+function stamp<T extends object>(x: T): T & { schema: number } {
+  return { ...x, schema: SCHEMA };
+}
+
+export function sanitizeArtwork(raw: unknown): { work: Artwork; migrated: boolean } | null {
   if (!raw || typeof raw !== 'object') return null;
   const o = raw as Record<string, unknown>;
   const size = sanitizeSize(o.size);
+  const base = sanitizeGrid(o.base, size * size);
+  const pixels = sanitizeGrid(o.pixels, size * size);
+  let program = sanitizeProgram(o.program);
+  let migrated = false;
+  if (schemaOf(o) < 2) {
+    const m = migrateProgram(program, base, size, pixels);
+    program = m.program;
+    migrated = true;
+  }
   return {
-    id: typeof o.id === 'string' ? o.id : uid(),
-    name: typeof o.name === 'string' ? o.name.slice(0, 30) : '이름 없는 작품',
-    size,
-    program: sanitizeProgram(o.program),
-    base: sanitizeGrid(o.base, size * size),
-    pixels: sanitizeGrid(o.pixels, size * size),
-    updatedAt: Number(o.updatedAt) || Date.now(),
+    work: {
+      id: typeof o.id === 'string' ? o.id : uid(),
+      name: typeof o.name === 'string' ? o.name.slice(0, 30) : '이름 없는 작품',
+      size,
+      program,
+      base,
+      pixels,
+      updatedAt: Number(o.updatedAt) || Date.now(),
+    },
+    migrated,
   };
 }
 export function loadWorks(): Artwork[] {
   const arr = read<unknown[]>(KEYS.works, []);
-  return (Array.isArray(arr) ? arr : []).map(sanitizeArtwork).filter((a): a is Artwork => !!a).sort((a, b) => b.updatedAt - a.updatedAt);
+  const items = (Array.isArray(arr) ? arr : []).map(sanitizeArtwork).filter((a) => a !== null);
+  const works = items.map((a) => a.work).sort((a, b) => b.updatedAt - a.updatedAt);
+  if (items.some((a) => a.migrated)) write(KEYS.works, works.map(stamp));
+  return works;
 }
 export function upsertWork(w: Artwork): boolean {
   const list = loadWorks().filter((x) => x.id !== w.id);
   list.unshift(w);
-  return write(KEYS.works, list);
+  return write(KEYS.works, list.map(stamp));
 }
 export function deleteWork(id: string): boolean {
-  return write(KEYS.works, loadWorks().filter((x) => x.id !== id));
+  return write(
+    KEYS.works,
+    loadWorks()
+      .filter((x) => x.id !== id)
+      .map(stamp),
+  );
 }
 
 // ── 애니메이션 ──
@@ -167,16 +194,23 @@ export interface AnimProject {
   frames: AnimFrame[];
   updatedAt: number;
 }
+export const MAX_FRAMES = 40;
+
 export function sanitizeAnim(raw: unknown): AnimProject | null {
   if (!raw || typeof raw !== 'object') return null;
   const o = raw as Record<string, unknown>;
   const size = sanitizeSize(o.size);
-  const frames = (Array.isArray(o.frames) ? o.frames : [])
-    .slice(0, 40)
-    .map((f) => {
-      const fo = (f && typeof f === 'object' ? f : {}) as Record<string, unknown>;
-      return { id: typeof fo.id === 'string' ? fo.id : uid(), program: sanitizeProgram(fo.program), base: sanitizeGrid(fo.base, size * size) };
-    });
+  const old = schemaOf(o) < 2;
+  const frames = (Array.isArray(o.frames) ? o.frames : []).slice(0, MAX_FRAMES).map((f) => {
+    const fo = (f && typeof f === 'object' ? f : {}) as Record<string, unknown>;
+    const base = sanitizeGrid(fo.base, size * size);
+    const program = sanitizeProgram(fo.program);
+    return {
+      id: typeof fo.id === 'string' ? fo.id : uid(),
+      program: old ? migrateProgram(program, base, size).program : program,
+      base,
+    };
+  });
   if (frames.length === 0) frames.push({ id: uid(), program: [], base: sanitizeGrid(null, size * size) });
   const fps = Number(o.fps);
   return {
@@ -191,15 +225,26 @@ export function sanitizeAnim(raw: unknown): AnimProject | null {
 }
 export function loadAnims(): AnimProject[] {
   const arr = read<unknown[]>(KEYS.anims, []);
-  return (Array.isArray(arr) ? arr : []).map(sanitizeAnim).filter((a): a is AnimProject => !!a).sort((a, b) => b.updatedAt - a.updatedAt);
+  const raw = Array.isArray(arr) ? arr : [];
+  const anims = raw
+    .map(sanitizeAnim)
+    .filter((a): a is AnimProject => !!a)
+    .sort((a, b) => b.updatedAt - a.updatedAt);
+  if (raw.some((r) => r && typeof r === 'object' && schemaOf(r as Record<string, unknown>) < 2)) write(KEYS.anims, anims.map(stamp));
+  return anims;
 }
 export function upsertAnim(a: AnimProject): boolean {
   const list = loadAnims().filter((x) => x.id !== a.id);
   list.unshift(a);
-  return write(KEYS.anims, list);
+  return write(KEYS.anims, list.map(stamp));
 }
 export function deleteAnim(id: string): boolean {
-  return write(KEYS.anims, loadAnims().filter((x) => x.id !== id));
+  return write(
+    KEYS.anims,
+    loadAnims()
+      .filter((x) => x.id !== id)
+      .map(stamp),
+  );
 }
 
 // ── 작업 중 임시 저장 (새로고침해도 이어서 하기) ──
@@ -215,17 +260,19 @@ export function loadWorkshopDraft(): WorkshopDraft | null {
   const o = read<Record<string, unknown> | null>(KEYS.draftWorkshop, null);
   if (!o || typeof o !== 'object') return null;
   const size = sanitizeSize(o.size);
+  const base = sanitizeGrid(o.base, size * size);
+  const program = sanitizeProgram(o.program);
   return {
     savedId: typeof o.savedId === 'string' ? o.savedId : null,
     name: typeof o.name === 'string' ? o.name.slice(0, 30) : '',
     size,
-    program: sanitizeProgram(o.program),
-    base: sanitizeGrid(o.base, size * size),
+    program: schemaOf(o) < 2 ? migrateProgram(program, base, size).program : program,
+    base,
     dirty: !!o.dirty,
   };
 }
 export function saveWorkshopDraft(d: WorkshopDraft) {
-  write(KEYS.draftWorkshop, d);
+  write(KEYS.draftWorkshop, stamp(d));
 }
 export interface TheaterDraft {
   project: AnimProject;
@@ -235,12 +282,14 @@ export interface TheaterDraft {
 export function loadTheaterDraft(): TheaterDraft | null {
   const o = read<Record<string, unknown> | null>(KEYS.draftTheater, null);
   if (!o || typeof o !== 'object') return null;
-  const project = sanitizeAnim(o.project);
+  // 예전 임시 저장은 안쪽 project 에 schema 가 없어요. 바깥 표시를 안쪽에도 알려줘요.
+  const inner = o.project && typeof o.project === 'object' ? { ...(o.project as Record<string, unknown>), schema: schemaOf(o) } : o.project;
+  const project = sanitizeAnim(inner);
   if (!project) return null;
   return { project, savedId: typeof o.savedId === 'string' ? o.savedId : null, dirty: !!o.dirty };
 }
 export function saveTheaterDraft(d: TheaterDraft) {
-  write(KEYS.draftTheater, d);
+  write(KEYS.draftTheater, stamp(d));
 }
 
 export function formatDate(t: number): string {

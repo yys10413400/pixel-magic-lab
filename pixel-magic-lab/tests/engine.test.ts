@@ -31,7 +31,14 @@ describe('실행 엔진 — 기본 블록', () => {
     const r = run('R D R D L U');
     expect([r.finalX, r.finalY]).toEqual([1, 1]);
     expect(r.finalGrid.every((c) => c === null)).toBe(true);
-    expect(r.steps.map((s) => [s.x, s.y])).toEqual([[1, 0], [1, 1], [2, 1], [2, 2], [1, 2], [1, 1]]);
+    expect(r.steps.map((s) => [s.x, s.y])).toEqual([
+      [1, 0],
+      [1, 1],
+      [2, 1],
+      [2, 2],
+      [1, 2],
+      [1, 1],
+    ]);
   });
 
   it('색칠하기는 현재 칸을 현재 색으로 칠한다 (기본 보라)', () => {
@@ -251,5 +258,29 @@ describe('펜 출발 위치', () => {
   it('출발 위치를 주지 않으면 (0,0) — 미션 모드 그대로', () => {
     const r = runProgram(parseProgram('paint'), { width: 8, height: 8 });
     expect(r.finalGrid[0]).toBe('P');
+  });
+});
+
+describe('블록 옮기기 (nudgeBlock)', () => {
+  it('옆에 반복 블록이 있으면 그 안으로 들어가고, 끝에서는 밖으로 나와요', () => {
+    let p = parseProgram('repeat:2[R] paint');
+    const [rep, paint] = p;
+    p = nudgeBlock(p, paint.id, -1); // 위로 → 반복 안 맨 끝
+    expect(locate(p, paint.id)).toEqual({ listId: rep.id, index: 1 });
+    p = nudgeBlock(p, paint.id, 1); // 아래로 → 반복 밖, 반복 바로 뒤
+    expect(locate(p, paint.id)).toEqual({ listId: null, index: 1 });
+    p = nudgeBlock(p, paint.id, -1);
+    p = nudgeBlock(p, paint.id, -1); // 반복 안 맨 앞으로
+    expect(locate(p, paint.id)).toEqual({ listId: rep.id, index: 0 });
+    p = nudgeBlock(p, paint.id, -1); // 반복 맨 앞에서 위로 → 반복 앞으로 나와요
+    expect(locate(p, paint.id)).toEqual({ listId: null, index: 0 });
+  });
+
+  it('반복을 너무 깊게 겹치게 되면 들어가지 않고 건너뛰어요', () => {
+    let p = parseProgram('repeat:2[R] repeat:2[repeat:2[repeat:2[paint]]]'); // 3겹 반복을 다른 반복 안에 넣으면 4겹
+    const outer2 = p[1];
+    p = nudgeBlock(p, outer2.id, -1);
+    // 4겹이 되므로 안으로 들어가지 않고 앞으로 자리만 바꿔요
+    expect(locate(p, outer2.id)).toEqual({ listId: null, index: 0 });
   });
 });

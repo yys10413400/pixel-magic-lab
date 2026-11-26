@@ -4,7 +4,16 @@ import { ConfirmDialog, Modal, Stars, type ConfirmState } from './components/ui'
 import { MissionMode } from './modes/MissionMode';
 import { WorkshopMode } from './modes/WorkshopMode';
 import { TheaterMode } from './modes/TheaterMode';
-import { loadProgress, loadSettings, resetProgress, saveProgress, saveSettings, type Progress, type Settings, type SpeedKey } from './lib/storage';
+import {
+  loadProgress,
+  loadSettings,
+  resetProgress,
+  saveProgress,
+  saveSettings,
+  type Progress,
+  type Settings,
+  type SpeedKey,
+} from './lib/storage';
 import { setMuted, play } from './lib/sound';
 import { MISSION_DATA, titleFor, DIFFICULTY_LABEL } from './data/missions';
 import { countBlocks, parseProgram } from './engine/program';
@@ -104,7 +113,13 @@ export default function App() {
         </div>
         <nav className="mode-tabs" aria-label="모드 선택">
           {MODES.map((m) => (
-            <button type="button" key={m.key} className={'mode-tab t-' + m.key + (mode === m.key ? ' on' : '')} aria-current={mode === m.key ? 'page' : undefined} onClick={() => switchMode(m.key)}>
+            <button
+              type="button"
+              key={m.key}
+              className={'mode-tab t-' + m.key + (mode === m.key ? ' on' : '')}
+              aria-current={mode === m.key ? 'page' : undefined}
+              onClick={() => switchMode(m.key)}
+            >
               <Icon name={m.icon} size={22} />
               <span className="mt-label">{m.label}</span>
             </button>
@@ -116,7 +131,13 @@ export default function App() {
             <b>{totalStars}</b>
             <span className="wb-title">{titleFor(totalStars)}</span>
           </div>
-          <button type="button" className="btn-icon" onClick={() => setSettings((s) => ({ ...s, muted: !s.muted }))} aria-label={settings.muted ? '소리 켜기' : '소리 끄기'} title={settings.muted ? '소리 켜기' : '소리 끄기'}>
+          <button
+            type="button"
+            className="btn-icon"
+            onClick={() => setSettings((s) => ({ ...s, muted: !s.muted }))}
+            aria-label={settings.muted ? '소리 켜기' : '소리 끄기'}
+            title={settings.muted ? '소리 켜기' : '소리 끄기'}
+          >
             <Icon name={settings.muted ? 'mute' : 'sound'} size={22} />
           </button>
           <button type="button" className="btn-icon" onClick={toggleFull} aria-label="전체 화면" title="전체 화면">
@@ -133,7 +154,14 @@ export default function App() {
 
       <main className="stage-area">
         <div className="mode-pane" hidden={mode !== 'mission'}>
-          <MissionMode active={mode === 'mission'} progress={progress} setProgress={setProgress} speed={settings.speed} setSpeed={setSpeed} ask={ask} />
+          <MissionMode
+            active={mode === 'mission'}
+            progress={progress}
+            setProgress={setProgress}
+            speed={settings.speed}
+            setSpeed={setSpeed}
+            ask={ask}
+          />
         </div>
         <div className="mode-pane" hidden={mode !== 'workshop'}>
           <WorkshopMode active={mode === 'workshop'} handleRef={workshopRef} speed={settings.speed} setSpeed={setSpeed} ask={ask} />
@@ -145,16 +173,32 @@ export default function App() {
 
       <ConfirmDialog state={confirm} onClose={() => setConfirm(null)} />
 
-      <Modal open={helpOpen} onClose={() => setHelpOpen(false)} title="이렇게 사용해요" className="help" icon={<Icon name="help" size={24} />}>
+      <Modal
+        open={helpOpen}
+        onClose={() => setHelpOpen(false)}
+        title="이렇게 사용해요"
+        className="help"
+        icon={<Icon name="help" size={24} />}
+      >
         <HelpContent />
       </Modal>
 
-      <Modal open={teacherOpen} onClose={() => setTeacherOpen(false)} title="선생님 도구" className="teacher" icon={<Icon name="teacher" size={24} />}>
+      <Modal
+        open={teacherOpen}
+        onClose={() => setTeacherOpen(false)}
+        title="선생님 도구"
+        className="teacher"
+        icon={<Icon name="teacher" size={24} />}
+      >
         <div className="teacher-grid">
           <section>
             <h3>수업 설정</h3>
             <label className="switch">
-              <input type="checkbox" checked={progress.unlockAll} onChange={(e) => setProgress((p) => ({ ...p, unlockAll: e.target.checked }))} />
+              <input
+                type="checkbox"
+                checked={progress.unlockAll}
+                onChange={(e) => setProgress((p) => ({ ...p, unlockAll: e.target.checked }))}
+              />
               <span className="sw-track" />
               모든 미션 바로 열기 (잠금 해제)
             </label>
@@ -164,7 +208,8 @@ export default function App() {
             </button>
             <h3>기록 관리</h3>
             <p className="note">
-              모든 기록은 이 컴퓨터의 브라우저에만 저장돼요. 회원가입이나 서버가 필요 없어요. 학생 작품은 각 화면의 PNG / GIF 내려받기로 모을 수 있어요.
+              모든 기록은 이 컴퓨터의 브라우저에만 저장돼요. 회원가입이나 서버가 필요 없어요. 학생 작품은 각 화면의 PNG / GIF 내려받기로
+              모을 수 있어요.
             </p>
             <button
               type="button"
@@ -218,7 +263,9 @@ export default function App() {
                 })}
               </tbody>
             </table>
-            <p className="note">블록 수: 학생 최고 기록 / 정답 예시. 정답 예시 코드는 각 미션의 [힌트] → [정답 예시 보기]에서 확인할 수 있어요.</p>
+            <p className="note">
+              블록 수: 학생 최고 기록 / 정답 예시. 정답 예시 코드는 각 미션의 [힌트] → [정답 예시 보기]에서 확인할 수 있어요.
+            </p>
           </section>
         </div>
       </Modal>
@@ -241,10 +288,22 @@ function Logo() {
 
 function HelpContent() {
   const steps: { icon: 'wand' | 'code' | 'play' | 'step'; title: string; text: string }[] = [
-    { icon: 'wand', title: '1. 블록 고르기', text: '왼쪽 위 [마법 블록]을 누르면 아래 작업 공간의 ✦ 자리에 블록이 들어가요. 끌어다 놓아도 돼요.' },
-    { icon: 'code', title: '2. 주문 고치기', text: '블록을 누르면 ▲▼(옮기기), 복사, 휴지통 버튼이 나와요. 반복 블록의 − / + 로 횟수를 바꿔요.' },
+    {
+      icon: 'wand',
+      title: '1. 블록 고르기',
+      text: '왼쪽 위 [마법 블록]을 누르면 아래 작업 공간의 ✦ 자리에 블록이 들어가요. 끌어다 놓아도 돼요.',
+    },
+    {
+      icon: 'code',
+      title: '2. 주문 고치기',
+      text: '블록을 누르면 ▲▼(옮기기), 복사, 휴지통 버튼이 나와요. 반복 블록의 − / + 로 횟수를 바꿔요.',
+    },
     { icon: 'play', title: '3. 실행하기', text: '[실행하기]를 누르면 마법 펜(점선 네모와 별)이 블록 순서대로 움직이며 칸을 칠해요.' },
-    { icon: 'step', title: '4. 한 단계씩 살펴보기', text: '[한 단계]를 누르면 명령이 하나씩 실행돼요. 지금 실행 중인 블록은 반짝이는 테두리로 보여요.' },
+    {
+      icon: 'step',
+      title: '4. 한 단계씩 살펴보기',
+      text: '[한 단계]를 누르면 명령이 하나씩 실행돼요. 지금 실행 중인 블록은 반짝이는 테두리로 보여요.',
+    },
   ];
   return (
     <div className="help-content">
@@ -263,7 +322,10 @@ function HelpContent() {
         <h3>마법 규칙</h3>
         <ul>
           <li>좌표는 (가로, 세로)예요. 왼쪽 위 칸이 (0,0)이고, 오른쪽으로 갈수록 가로 숫자가, 아래로 갈수록 세로 숫자가 커져요.</li>
-          <li>펜은 보라색으로 출발해요. 미션에서는 왼쪽 위 (0,0)에서, 자유 공방과 픽셀 극장에서는 도화지 가운데(8×8이면 (4,4))에서 출발해요. 처음 칸은 저절로 칠해지지 않아요.</li>
+          <li>
+            펜은 보라색으로 출발해요. 미션에서는 왼쪽 위 (0,0)에서, 자유 공방과 픽셀 극장에서는 도화지 가운데(8×8이면 (4,4))에서 출발해요.
+            처음 칸은 저절로 칠해지지 않아요.
+          </li>
           <li>[색칠하기]를 실행할 때만 칸이 칠해지고, 이동 블록은 펜만 옮겨요.</li>
           <li>실행할 때마다 도화지는 깨끗하게 다시 시작해요.</li>
           <li>도화지 밖으로 나가려 하면 마법이 멈추고, 문제가 된 블록에 빨간 표시가 생겨요.</li>

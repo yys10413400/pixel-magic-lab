@@ -1,0 +1,49 @@
+name: 검사
+
+# main 에 올리거나 PR 을 열 때마다: 타입 검사 · 코드 검사 · 형식 · 단위/화면 테스트 · 빌드 · 브라우저 테스트
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: pixel-magic-lab
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: pixel-magic-lab/package-lock.json
+      - run: npm ci
+      - name: 타입 · 코드 검사 · 형식 · 단위/화면 테스트
+        run: npm run check
+      - name: 빌드 (폴더용 dist + 한 파일 HTML)
+        run: |
+          npm run build
+          npm run build:html
+      - name: 브라우저 준비
+        run: npx playwright install --with-deps chromium
+      - name: 브라우저 테스트
+        run: npm run test:e2e
+      - name: 실패하면 테스트 보고서 올리기
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: pixel-magic-lab/playwright-report
+          retention-days: 7

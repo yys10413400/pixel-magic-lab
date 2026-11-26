@@ -36,7 +36,7 @@ class Halt {
 }
 
 export function emptyGrid(width: number, height: number): Grid {
-  return new Array(width * height).fill(null);
+  return Array.from({ length: width * height }, (): ColorKey | null => null);
 }
 
 /** 도화지의 가운데 칸. 짝수 크기는 가운데 4칸 중 오른쪽 아래 칸 (8×8 → (4,4)) */
@@ -186,6 +186,12 @@ export function gridFromRows(rows: string[]): { width: number; height: number; g
 
 export function gridToRows(grid: Grid, width: number): string[] {
   const rows: string[] = [];
-  for (let i = 0; i < grid.length; i += width) rows.push(grid.slice(i, i + width).map((c) => c ?? '.').join(''));
+  for (let i = 0; i < grid.length; i += width)
+    rows.push(
+      grid
+        .slice(i, i + width)
+        .map((c) => c ?? '.')
+        .join(''),
+    );
   return rows;
 }

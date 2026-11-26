@@ -1,0 +1,25 @@
+/* 오류 안내 화면 */
+.crash {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.crash-card {
+  max-width: 460px;
+  text-align: center;
+  background: var(--paper);
+  border: 3px solid var(--line-2);
+  border-radius: 24px;
+  padding: 28px;
+  box-shadow: var(--lift), var(--soft);
+}
+.crash-card h1 {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  color: var(--lav-dd);
+  margin: 0 0 8px;
+}
+.crash-card p {
+  line-height: 1.6;
+}

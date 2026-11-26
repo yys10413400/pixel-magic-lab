@@ -15,7 +15,11 @@ export function hexToRgb(hex: string): RGB {
 
 /** 파일 이름에 쓸 수 없는 글자를 정리 */
 export function safeFileName(name: string, fallback = '픽셀작품'): string {
-  const n = name.trim().replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, '_').slice(0, 40);
+  const n = name
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, '')
+    .replace(/\s+/g, '_')
+    .slice(0, 40);
   return n || fallback;
 }
 
@@ -24,7 +28,16 @@ export function exportScale(width: number, height: number): number {
   return Math.max(8, Math.floor(320 / Math.max(width, height)));
 }
 
-export function drawGrid(ctx: CanvasRenderingContext2D, grid: Grid, width: number, height: number, scale: number, ox = 0, oy = 0, transparent = false) {
+export function drawGrid(
+  ctx: CanvasRenderingContext2D,
+  grid: Grid,
+  width: number,
+  height: number,
+  scale: number,
+  ox = 0,
+  oy = 0,
+  transparent = false,
+) {
   if (!transparent) {
     ctx.fillStyle = BG_HEX;
     ctx.fillRect(ox, oy, width * scale, height * scale);
@@ -84,7 +97,14 @@ export async function exportSpriteSheet(frames: Grid[], width: number, height: n
 }
 
 /** 프레임 격자 → GIF 바이트 (테스트에서도 사용) */
-export function buildGif(frames: Grid[], width: number, height: number, fps: number, loop: boolean, scale = exportScale(width, height)): Uint8Array {
+export function buildGif(
+  frames: Grid[],
+  width: number,
+  height: number,
+  fps: number,
+  loop: boolean,
+  scale = exportScale(width, height),
+): Uint8Array {
   const palette: RGB[] = [hexToRgb(BG_HEX), ...PALETTE.map((c) => hexToRgb(c.hex))];
   const indexOf = new Map(PALETTE.map((c, i) => [c.key, i + 1]));
   const W = width * scale;

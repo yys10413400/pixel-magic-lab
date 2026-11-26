@@ -103,7 +103,19 @@ describe('GIF 내보내기', () => {
   it('여러 프레임 GIF 파일 구조가 올바르다', () => {
     const f1 = new Uint8Array([0, 1, 2, 3]);
     const f2 = new Uint8Array([3, 2, 1, 0]);
-    const gif = encodeGif({ width: 2, height: 2, palette: [[0, 0, 0], [255, 0, 0], [0, 255, 0], [0, 0, 255]], frames: [f1, f2], delayCs: 25, loop: true });
+    const gif = encodeGif({
+      width: 2,
+      height: 2,
+      palette: [
+        [0, 0, 0],
+        [255, 0, 0],
+        [0, 255, 0],
+        [0, 0, 255],
+      ],
+      frames: [f1, f2],
+      delayCs: 25,
+      loop: true,
+    });
     const parsed = parseGif(gif);
     expect(parsed.sig).toBe('GIF89a');
     expect(parsed.frames).toEqual([Array.from(f1), Array.from(f2)]);
@@ -129,20 +141,21 @@ describe('GIF 내보내기', () => {
 describe('애니메이션 템플릿', () => {
   it('모든 템플릿 프레임은 8×8 이고 코드가 오류 없이 실행된다', () => {
     for (const t of TEMPLATES) {
-      for (const f of t.frames) {
-        if (f.rows) {
-          const g = gridFromRows(f.rows);
-          expect([g.width, g.height]).toEqual([8, 8]);
-        }
+      for (const f of t.frames.filter((fr) => fr.rows)) {
+        const g = gridFromRows(f.rows!);
+        expect([g.width, g.height]).toEqual([8, 8]);
       }
       const p = projectFromTemplate(t);
-      for (const f of p.frames) expect(runProgram(f.program, { width: 8, height: 8, base: f.base, startX: 4, startY: 4 }).error).toBeUndefined();
+      for (const f of p.frames)
+        expect(runProgram(f.program, { width: 8, height: 8, base: f.base, startX: 4, startY: 4 }).error).toBeUndefined();
     }
   });
 
   it('코드로 굴리는 공: 프레임마다 공이 한 칸씩 이동', () => {
     const p = projectFromTemplate(TEMPLATES.find((t) => t.key === 'ball')!);
-    const xs = p.frames.map((f) => runProgram(f.program, { width: 8, height: 8, base: f.base, startX: 4, startY: 4 }).finalGrid.findIndex((c) => c === 'R') % 8);
+    const xs = p.frames.map(
+      (f) => runProgram(f.program, { width: 8, height: 8, base: f.base, startX: 4, startY: 4 }).finalGrid.findIndex((c) => c === 'R') % 8,
+    );
     expect(xs).toEqual([0, 1, 2, 3, 4, 5, 6, 7]);
   });
 

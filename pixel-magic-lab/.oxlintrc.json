@@ -1,0 +1,45 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "jsx-a11y", "unicorn", "import", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "no-console": [
+      "warn",
+      {
+        "allow": ["error", "warn"]
+      }
+    ],
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "off",
+    "eqeqeq": ["error", "smart"],
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "unicorn/no-array-sort": "off",
+    "unicorn/consistent-function-scoping": "off",
+    "import/no-unassigned-import": [
+      "warn",
+      {
+        "allow": ["**/*.css", "@fontsource/**", "@testing-library/jest-dom/vitest"]
+      }
+    ]
+  },
+  "ignorePatterns": ["dist", "build-single-tmp", "node_modules", "pixel-magic-lab.html", "playwright-report", "test-results"],
+  "overrides": [
+    {
+      "files": ["tests/**", "e2e/**"],
+      "rules": {
+        "no-await-in-loop": "off"
+      }
+    }
+  ]
+}

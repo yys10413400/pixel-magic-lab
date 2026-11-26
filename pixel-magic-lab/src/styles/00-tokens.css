@@ -1,0 +1,118 @@
+/* ─────────────────────────────────────────────
+   픽셀 마법사 연구소 — 디자인 시스템
+   크림 아이보리 종이 + 라벤더 잉크 + 민트·핑크·버터 포인트
+   모든 카드·버튼·블록은 "도톰한 종이 스티커" 느낌으로 통일
+   ───────────────────────────────────────────── */
+
+:root {
+  --cream: #fff8ec;
+  --paper: #fffdf8;
+  --paper-2: #fdf6ea;
+  --ink: #5a4034;
+  --ink-soft: #8c7262;
+  --ink-faint: #b9a593;
+  --line: #ecdfcb;
+  --line-2: #e2d2b9;
+
+  --lav: #a68be0;
+  --lav-d: #7a5fc6;
+  --lav-dd: #5e45a8;
+  --lav-l: #efe8fb;
+  --lav-ll: #f7f3fd;
+  --mint: #7fd8c8;
+  --mint-d: #3e9f8a;
+  --mint-l: #ddf6f0;
+  --pink: #f59cc1;
+  --pink-d: #d0628f;
+  --pink-l: #fde6f0;
+  --butter: #ffd85e;
+  --butter-d: #c8981a;
+  --butter-l: #fff4cf;
+  --coral: #e2655f;
+  --coral-l: #ffe4e0;
+
+  --r-lg: 20px;
+  --r-md: 14px;
+  --r-sm: 10px;
+  --lift: 0 3px 0 rgba(90, 64, 52, 0.13);
+  --soft: 0 10px 24px rgba(90, 64, 52, 0.07);
+
+  --font-ui: 'Jua', 'Gowun Dodum', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  --font-body: 'Gowun Dodum', 'Jua', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--ink);
+  background-color: var(--cream);
+  background-image:
+    radial-gradient(circle at 12% 18%, rgba(166, 139, 224, 0.1) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 62%, rgba(245, 156, 193, 0.1) 0 2px, transparent 3px),
+    radial-gradient(circle at 45% 85%, rgba(127, 216, 200, 0.12) 0 2px, transparent 3px),
+    radial-gradient(circle, rgba(200, 180, 150, 0.16) 1px, transparent 1.5px);
+  background-size:
+    220px 220px,
+    260px 260px,
+    300px 300px,
+    22px 22px;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+button,
+input,
+select {
+  font-family: var(--font-ui);
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+:focus-visible {
+  outline: 3px solid var(--lav);
+  outline-offset: 2px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.icon {
+  flex: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.muted {
+  color: var(--ink-faint);
+}
+
+.note {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 6px 0;
+}
+.note.center {
+  text-align: center;
+}

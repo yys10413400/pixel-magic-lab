@@ -1,0 +1,11 @@
+/* 픽셀 마법사 연구소 스타일 — 순서가 중요해요 (뒤의 파일이 앞의 규칙을 덮어써요) */
+@import './00-tokens.css'; /* 색 · 글꼴 · 그림자 등 디자인 값과 기본 스타일 */
+@import './01-layout.css'; /* 앱 뼈대 (머리, 모드 탭, 3단 배치) */
+@import './02-controls.css'; /* 공통 카드 · 버튼 */
+@import './03-blocks.css'; /* 블록 편집기 */
+@import './04-stage.css'; /* 무대: 도화지 · 상태 표시줄 · 실행 버튼 */
+@import './05-panels.css'; /* 오른쪽 패널 · 공방 · 극장 */
+@import './06-dialogs.css'; /* 팝업 (안내 · 확인 · 갤러리 · 미션 지도 · 성공) */
+@import './07-motion.css'; /* 움직임 (애니메이션) */
+@import './08-responsive.css'; /* 화면 크기 대응 */
+@import './09-crash.css'; /* 오류 안내 화면 */

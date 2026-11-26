@@ -1,0 +1,7 @@
+dist
+build-single-tmp
+node_modules
+pixel-magic-lab.html
+package-lock.json
+playwright-report
+test-results

@@ -140,9 +140,7 @@ export function insertBlock(p: Program, listId: string | null, index: number, bl
 }
 
 export function removeBlock(p: Program, id: string): Program {
-  return p
-    .filter((b) => b.id !== id)
-    .map((b) => (b.type === 'repeat' ? { ...b, body: removeBlock(b.body, id) } : b));
+  return p.filter((b) => b.id !== id).map((b) => (b.type === 'repeat' ? { ...b, body: removeBlock(b.body, id) } : b));
 }
 
 export function updateBlock(p: Program, id: string, patch: Partial<Block>): Program {
@@ -167,13 +165,27 @@ export function moveBlock(p: Program, id: string, listId: string | null, index: 
 }
 
 /** 같은 목록 안에서 한 칸 위/아래로 */
+/**
+ * 블록을 한 칸 위(-1)/아래(+1)로 옮기기.
+ * 옆에 반복 블록이 있으면 그 안으로 들어가고, 반복의 맨 끝/맨 앞에서는 밖으로 나와요.
+ * 옮길 수 없으면 같은 프로그램을 그대로 돌려줘요.
+ */
 export function nudgeBlock(p: Program, id: string, delta: -1 | 1): Program {
   const loc = locate(p, id);
   if (!loc) return p;
-  const len = listLength(p, loc.listId);
-  const ni = loc.index + delta;
-  if (ni < 0 || ni >= len) return p;
-  return moveBlock(p, id, loc.listId, delta > 0 ? ni + 1 : ni);
+  const list = loc.listId === null ? p : (findBlock(p, loc.listId) as RepeatBlock).body;
+  const block = list[loc.index];
+  const without = removeBlock(p, id);
+  const neighbor = list[loc.index + delta];
+  if (neighbor) {
+    if (neighbor.type === 'repeat' && canInsert(without, neighbor.id, block)) {
+      return moveBlock(p, id, neighbor.id, delta < 0 ? neighbor.body.length : 0);
+    }
+    return moveBlock(p, id, loc.listId, delta < 0 ? loc.index - 1 : loc.index + 2);
+  }
+  if (loc.listId === null) return p;
+  const parent = locate(p, loc.listId)!;
+  return moveBlock(p, id, parent.listId, delta < 0 ? parent.index : parent.index + 1);
 }
 
 /** 블록을 복제 (새 id) */
