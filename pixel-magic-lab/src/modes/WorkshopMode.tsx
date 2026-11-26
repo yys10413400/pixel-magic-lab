@@ -309,7 +309,7 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
             <Icon name="save" size={18} /> 작품 관리
           </h3>
           <div className="btn-stack">
-            <button type="button" className="btn btn-primary" onClick={save}>
+            <button type="button" className="btn btn-save" onClick={save}>
               <Icon name="save" size={20} /> 저장하기
             </button>
             <button type="button" className="btn" onClick={openGallery}>

@@ -25,7 +25,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `node node_modules/vite/bin/vite.js --port ${PORT} --strictPort`,
+    // 개발 서버가 아니라 빌드된 결과물(dist)을 띄워요: 실제 배포본을 시험하고, 첫 실행 때 페이지가 새로 고쳐지는 일이 없어요
+    command: `node node_modules/vite/bin/vite.js preview --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !ci,
     timeout: 60_000,

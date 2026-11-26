@@ -1,10 +1,9 @@
-/* ── 팝업 ─────────────────────────────── */
+/* ── 팝업: 남색 픽셀 모서리 틀의 마법책 한 장 ─────────────────────────────── */
 .modal-back {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(90, 64, 52, 0.32);
-  backdrop-filter: blur(2px);
+  background: rgba(38, 34, 90, 0.42);
   display: grid;
   place-items: center;
   padding: 16px;
@@ -12,47 +11,35 @@
 }
 .modal {
   position: relative;
-  width: min(560px, 100%);
-  max-height: calc(100vh - 32px);
-  max-height: calc(100dvh - 32px);
+  width: min(560px, calc(100% - 8px));
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
   display: flex;
   flex-direction: column;
-  background: var(--paper);
-  border: 3px solid var(--line-2);
-  border-radius: 24px;
+  background: var(--sheet);
   box-shadow:
-    0 5px 0 rgba(90, 64, 52, 0.15),
-    0 24px 60px rgba(90, 64, 52, 0.25);
-  animation: popIn 0.25s cubic-bezier(0.3, 1.4, 0.6, 1);
-}
-.modal-corners {
-  position: absolute;
-  inset: 8px;
-  width: calc(100% - 16px);
-  height: calc(100% - 16px);
-  pointer-events: none;
-  fill: none;
-  stroke: #d0c0f0;
-  stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
+    0 -4px 0 0 var(--ink),
+    0 4px 0 0 var(--ink),
+    -4px 0 0 0 var(--ink),
+    4px 0 0 0 var(--ink),
+    0 12px 0 0 rgba(38, 34, 90, 0.25);
+  animation: popIn 0.22s cubic-bezier(0.3, 1.3, 0.6, 1);
 }
 .modal-head {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 16px 18px 6px 22px;
-  color: var(--lav-dd);
+  gap: 10px;
+  padding: 18px 18px 8px 22px;
+  color: var(--spell);
 }
 .modal-head h2 {
-  font-family: var(--font-ui);
-  font-weight: 400;
-  font-size: 23px;
+  font-size: var(--fs-xl);
   margin: 0;
   flex: 1;
   color: var(--ink);
 }
 .modal-body {
-  padding: 6px 22px 14px;
+  padding: 6px 22px 16px;
   overflow-y: auto;
   min-height: 0;
   position: relative;
@@ -60,12 +47,14 @@
 .modal-foot {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  padding: 10px 22px 18px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px 20px;
   flex-wrap: wrap;
+  border-top: 2px solid var(--rule);
 }
 .confirm-msg {
-  font-size: 16px;
+  font-size: var(--fs-md);
   line-height: 1.6;
 }
 .confirm-msg small {
@@ -81,89 +70,130 @@
 .modal.help {
   width: min(960px, 100%);
 }
-.map-group h3 {
-  font-family: var(--font-ui);
-  font-weight: 400;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 8px 0 8px;
-  font-size: 15px;
+/* ── 미션 지도: 지그재그 길 ── */
+.trail {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px 18px;
+  padding: 26px 6px 6px;
 }
-.map-group h3 small {
+.trail-path {
+  position: absolute;
+  inset: 26px 6px 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 32px);
+  pointer-events: none;
+}
+.trail-path polyline {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 10;
+  stroke-dasharray: 14 10;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.trail-stop {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'thumb num'
+    'thumb title'
+    'thumb meta';
+  align-items: center;
+  column-gap: 10px;
+  padding: 10px 12px 10px 10px;
+  margin: 3px;
+  background: var(--sheet);
+  color: var(--ink);
+  text-align: left;
+  border: 0;
+  box-shadow:
+    0 -3px 0 0 var(--rule-2),
+    0 3px 0 0 var(--rule-2),
+    -3px 0 0 0 var(--rule-2),
+    3px 0 0 0 var(--rule-2),
+    0 7px 0 0 var(--rule);
+}
+.trail-stop:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 -3px 0 0 var(--spell),
+    0 3px 0 0 var(--spell),
+    -3px 0 0 0 var(--spell),
+    3px 0 0 0 var(--spell),
+    0 7px 0 0 var(--rule);
+}
+.trail-stop.done {
+  background: #fbfdf5;
+}
+.trail-stop.current {
+  background: var(--spell-ll);
+  box-shadow:
+    0 -3px 0 0 var(--ink),
+    0 3px 0 0 var(--ink),
+    -3px 0 0 0 var(--ink),
+    3px 0 0 0 var(--ink),
+    0 7px 0 0 rgba(38, 34, 90, 0.25);
+}
+.trail-stop.locked {
+  background: var(--sheet-2);
   color: var(--ink-faint);
 }
-.map-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 10px;
+.trail-wizard {
+  position: absolute;
+  top: -34px;
+  right: 8px;
+  animation: wizardHop 0.6s ease-out;
 }
-.map-card {
+.ts-thumb {
+  grid-area: thumb;
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 10px 8px 8px;
-  border-radius: 16px;
-  border: 2.5px solid var(--line-2);
+  width: 58px;
+  height: 58px;
+  border: 2px solid var(--rule-2);
   background: #fff;
-  box-shadow: 0 3px 0 var(--line-2);
-  text-align: center;
 }
-.map-card:hover:not(:disabled) {
-  border-color: var(--lav);
-  transform: translateY(-2px);
+.trail-stop.locked .pixel-thumb {
+  filter: grayscale(1) opacity(0.25);
 }
-.map-card.current {
-  border-color: var(--lav);
-  background: var(--lav-ll);
-}
-.map-card.locked {
-  background: var(--paper-2);
-}
-.mc-thumb {
-  position: relative;
-  width: 64px;
-  height: 64px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid var(--line);
-  margin-bottom: 4px;
-}
-.map-card.locked .mc-thumb .pixel-thumb {
-  filter: grayscale(1) opacity(0.3);
-}
-.mc-lock {
+.ts-lock {
   position: absolute;
   inset: 0;
   display: grid;
   place-items: center;
   color: var(--ink-faint);
 }
-.mc-num {
+.ts-num {
+  grid-area: num;
   font-family: var(--font-ui);
-  font-size: 12px;
-  color: var(--lav-d);
+  font-size: var(--fs-lg);
+  line-height: 1;
+  color: var(--spell);
 }
-.mc-title {
+.trail-stop.locked .ts-num {
+  color: var(--ink-faint);
+}
+.ts-title {
+  grid-area: title;
   font-family: var(--font-ui);
-  font-size: 16px;
+  font-size: var(--fs-sm);
+  line-height: 1.25;
 }
-.mc-learn {
-  font-size: 12px;
+.ts-meta {
+  grid-area: meta;
+  margin-top: 2px;
+}
+.trail-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 14px 0 0;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
-}
-.mc-new {
-  font-family: var(--font-ui);
-  font-size: 13px;
-  color: var(--pink-d);
-}
-.mc-stamp {
-  position: absolute;
-  right: 4px;
-  top: 4px;
-  transform: rotate(12deg);
 }
 
 .stamp circle {
@@ -200,76 +230,85 @@
   width: 120px;
   height: 100px;
   padding: 8px;
-  border-radius: 14px;
-  background: var(--lav-ll);
-  border: 2px solid #e0d5f6;
+  background: var(--sheet-2);
+  border: 2px solid var(--rule-2);
 }
 
 .solution-list {
-  background: #fffcf6;
-  border: 2px solid var(--line);
-  border-radius: 14px;
+  background: var(--sheet-2);
+  border: 2px solid var(--rule);
+  border-radius: var(--r-md);
   padding: 10px;
   max-height: 46vh;
   overflow: auto;
 }
 
+/* ── 미션 성공: 마법사가 깡충, 도장이 쾅 ── */
 .modal.success {
-  width: min(520px, 100%);
-  background: linear-gradient(var(--lav-ll), var(--paper) 40%);
+  width: min(540px, calc(100% - 8px));
 }
 .success-body {
-  padding: 8px 4px 0;
+  padding: 12px 4px 0;
 }
 .succ-top {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 18px;
-  justify-content: center;
+  gap: 16px;
 }
-.succ-top h2 {
-  font-family: var(--font-ui);
-  font-weight: 400;
-  font-size: 34px;
+.succ-wizard .wizard-sprite {
+  animation: wizardHop 0.7s 0.15s ease-out both;
+}
+.succ-headline h2 {
+  font-size: var(--fs-2xl);
   margin: 0 0 4px;
-  color: var(--lav-dd);
+  color: var(--ink);
+}
+.succ-stamp {
+  align-self: start;
 }
 .succ-top .stamp {
-  animation: stampIn 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+  animation: stampIn 0.5s 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) both;
 }
 .succ-facts {
   list-style: none;
   padding: 0;
-  margin: 16px 0;
+  margin: 18px 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  font-size: 16px;
+  gap: 8px;
+  font-size: var(--fs-md);
 }
 .succ-facts li {
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: #fff;
-  border: 2px solid var(--line);
-  border-radius: 12px;
-  padding: 7px 12px;
+  gap: 8px;
+  padding: 8px 12px;
+  border-left: 5px solid var(--rule-2);
+  background: var(--sheet-2);
+}
+.succ-facts li .icon {
+  color: var(--spell);
 }
 .succ-facts li b {
   font-family: var(--font-ui);
   font-weight: 400;
-  color: var(--lav-dd);
-  font-size: 18px;
+  color: var(--spell-d);
+  font-size: var(--fs-lg);
 }
 .succ-facts li.bonus {
-  background: var(--butter-l);
-  border-color: #f3dd92;
+  border-left-color: var(--gold);
+  background: var(--gold-l);
+}
+.succ-facts li.bonus .icon {
+  color: var(--gold-d);
 }
 .succ-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  padding-bottom: 6px;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
 }
 
 .gallery-grid {
@@ -303,13 +342,13 @@
 }
 .g-name {
   font-family: var(--font-ui);
-  font-size: 16px;
+  font-size: var(--fs-xs);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .g-meta {
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
 }
 .g-actions {
@@ -321,7 +360,7 @@
   text-align: center;
   color: var(--lav-d);
   padding: 30px 10px;
-  font-size: 16px;
+  font-size: var(--fs-xs);
 }
 
 .tpl-grid {
@@ -347,11 +386,11 @@
 }
 .tpl-card b {
   font-weight: 400;
-  font-size: 16px;
+  font-size: var(--fs-xs);
 }
 .tpl-card small {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
 }
 .tpl-thumb {
@@ -373,7 +412,7 @@
 }
 .help-step {
   background: var(--lav-ll);
-  border: 2px solid #e0d5f6;
+  border: 2px solid var(--rule-2);
   border-radius: 16px;
   padding: 10px;
 }
@@ -385,7 +424,7 @@
 }
 .help-step p {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--fs-xs);
   line-height: 1.5;
 }
 .hs-ico {
@@ -396,7 +435,7 @@
   border-radius: 12px;
   background: #fff;
   color: var(--lav-d);
-  border: 2px solid #e0d5f6;
+  border: 2px solid var(--rule-2);
 }
 .help-rules h3 {
   font-family: var(--font-ui);
@@ -409,7 +448,7 @@
   margin: 0;
   padding-left: 20px;
   line-height: 1.6;
-  font-size: 15px;
+  font-size: var(--fs-xs);
 }
 
 .teacher-grid {
@@ -432,7 +471,7 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-ui);
-  font-size: 16px;
+  font-size: var(--fs-xs);
   cursor: pointer;
 }
 .switch input {
@@ -473,7 +512,7 @@
 .progress-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--fs-xs);
 }
 .progress-table th {
   font-family: var(--font-ui);
@@ -486,4 +525,9 @@
 .progress-table td {
   padding: 4px 6px;
   border-bottom: 1px dashed var(--line);
+}
+
+/* 잠긴 미션은 투명하게 만들지 않아요 (뒤의 길이 비쳐 보이지 않게) */
+.trail-stop:disabled {
+  opacity: 1;
 }

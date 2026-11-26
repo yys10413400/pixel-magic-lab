@@ -1,111 +1,130 @@
-/* ── 공통 카드 ─────────────────────────────── */
+/* ── 작업대 3단과 카드 ─────────────────────────────── */
 .mode {
   height: 100%;
   display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(330px, 29%) minmax(0, 1fr) minmax(250px, 22%);
+  gap: 12px;
+  grid-template-columns: minmax(340px, 29%) minmax(0, 1fr) minmax(260px, 22%);
 }
 .card {
   position: relative;
-  background: var(--paper);
-  border: 2.5px solid var(--line);
+  background: var(--sheet);
+  border: 2px solid var(--rule-2);
   border-radius: var(--r-lg);
-  box-shadow: var(--lift), var(--soft);
+  box-shadow: var(--soft);
   min-height: 0;
   min-width: 0;
   display: flex;
   flex-direction: column;
 }
-.card::before {
-  /* 바느질 점선 */
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border: 1.5px dashed rgba(166, 139, 224, 0.22);
-  border-radius: 16px;
-  pointer-events: none;
-}
 
-/* ── 공통 버튼 ─────────────────────────────── */
+/* ── 버튼 ───────────────────────────────
+   .btn          조용한 보조 버튼 (흰 바탕)
+   .btn-primary  화면에서 가장 중요한 한 가지 (보라 픽셀 버튼)
+   .btn-danger   지우기처럼 되돌릴 수 없는 일 (빨강 픽셀 버튼) */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 40px;
-  padding: 6px 14px;
-  font-size: 16px;
-  border-radius: 12px;
-  border: 2px solid var(--line-2);
-  background: var(--paper);
-  box-shadow: 0 3px 0 var(--line-2);
+  min-height: var(--tap);
+  padding: 6px 16px;
+  font-size: var(--fs-md);
+  border-radius: var(--r-sm);
+  border: 2px solid var(--rule-2);
+  background: var(--sheet);
+  color: var(--ink);
+  box-shadow: 0 3px 0 var(--rule-2);
   white-space: nowrap;
-  transition: background 0.12s;
+}
+.btn .icon {
+  color: var(--spell);
 }
 .btn:hover:not(:disabled) {
-  background: var(--lav-ll);
-  border-color: #d6c8f1;
+  border-color: var(--spell);
 }
 .btn:active:not(:disabled) {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--line-2);
+  box-shadow: 0 1px 0 var(--rule-2);
 }
-.btn-primary {
-  background: var(--lav);
-  border-color: var(--lav-d);
+.btn-primary,
+.btn-danger {
+  --pc: var(--spell-dd);
+  border: 0;
+  border-radius: 0;
+  margin: 3px;
+  background: var(--spell);
   color: #fff;
-  box-shadow: 0 3px 0 var(--lav-dd);
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+  box-shadow:
+    0 -3px 0 0 var(--pc),
+    0 3px 0 0 var(--pc),
+    -3px 0 0 0 var(--pc),
+    3px 0 0 0 var(--pc),
+    0 6px 0 0 var(--pc);
+}
+.btn-primary .icon,
+.btn-danger .icon {
+  color: inherit;
 }
 .btn-primary:hover:not(:disabled) {
-  background: #9479d9;
-  border-color: var(--lav-dd);
-}
-.btn-primary:active:not(:disabled) {
-  box-shadow: 0 1px 0 var(--lav-dd);
+  background: var(--spell-d);
 }
 .btn-danger {
-  background: var(--coral);
-  border-color: #c64a45;
-  color: #fff;
-  box-shadow: 0 3px 0 #b03f3a;
+  --pc: var(--danger-d);
+  background: var(--danger);
 }
 .btn-danger:hover:not(:disabled) {
-  background: #d65650;
-  border-color: #b03f3a;
+  background: var(--danger-d);
+}
+.btn-primary:active:not(:disabled),
+.btn-danger:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow:
+    0 -3px 0 0 var(--pc),
+    0 3px 0 0 var(--pc),
+    -3px 0 0 0 var(--pc),
+    3px 0 0 0 var(--pc);
 }
 .btn-wide {
   width: 100%;
+}
+.btn-primary.btn-wide,
+.btn-danger.btn-wide {
+  width: calc(100% - 6px);
 }
 
 .btn-mini {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: var(--fs-xs);
   padding: 3px 10px;
-  min-height: 30px;
-  border-radius: 9px;
-  border: 2px solid var(--line-2);
-  background: var(--paper);
-  box-shadow: 0 2px 0 var(--line-2);
+  min-height: 36px;
+  border-radius: 6px;
+  border: 2px solid var(--rule-2);
+  background: var(--sheet);
+  color: var(--ink);
   white-space: nowrap;
 }
+.btn-mini .icon {
+  color: var(--ink-soft);
+}
 .btn-mini:hover:not(:disabled) {
-  background: var(--lav-ll);
+  border-color: var(--spell);
 }
 .btn-mini.danger {
-  color: var(--coral);
+  color: var(--danger-d);
 }
 .btn-mini.danger:hover:not(:disabled) {
-  background: var(--coral-l);
+  border-color: var(--danger);
+  background: var(--danger-l);
 }
 
+/* 고르기 버튼 묶음 (도화지 크기, 그리기 방법 등): 고른 것은 남색 */
 .seg {
   display: inline-flex;
-  background: var(--paper-2);
-  border: 2px solid var(--line);
-  border-radius: 12px;
+  background: var(--sheet-2);
+  border: 2px solid var(--rule);
+  border-radius: var(--r-sm);
   padding: 2px;
   gap: 2px;
 }
@@ -115,74 +134,77 @@
   gap: 5px;
   border: 0;
   background: transparent;
-  border-radius: 9px;
-  padding: 4px 10px;
-  font-size: 15px;
+  border-radius: 6px;
+  padding: 4px 11px;
+  font-size: var(--fs-sm);
   color: var(--ink-soft);
   white-space: nowrap;
-  min-height: 32px;
+  min-height: 38px;
+}
+.seg button:hover {
+  color: var(--ink);
 }
 .seg button.on {
-  background: #fff;
-  color: var(--lav-dd);
-  box-shadow:
-    0 2px 0 var(--line-2),
-    0 0 0 2px #d9cbf3;
+  background: var(--ink);
+  color: #fff;
+}
+.seg button.on .icon {
+  color: var(--gold);
 }
 
 .sw {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border-radius: 6px;
-  border: 2px solid rgba(90, 64, 52, 0.25);
+  border: 2px solid rgba(38, 34, 90, 0.3);
   flex: none;
 }
 .sw.sm {
   width: 14px;
   height: 14px;
-  border-radius: 4px;
 }
 
 .mini-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
   cursor: pointer;
   user-select: none;
   white-space: nowrap;
+  min-height: 36px;
 }
 .mini-toggle input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--lav-d);
+  width: 20px;
+  height: 20px;
+  accent-color: var(--spell);
 }
 
+/* 난이도: 쉬움·보통·도전 (블록 색과 겹치지 않게 별 개수 느낌의 단계 색) */
 .diff-chip {
   font-family: var(--font-ui);
-  font-size: 13px;
-  padding: 2px 9px;
-  border-radius: 999px;
+  font-size: var(--fs-xs);
+  padding: 1px 9px;
+  border-radius: 4px;
   border: 2px solid;
   white-space: nowrap;
 }
 .diff-chip.d-easy {
-  background: var(--mint-l);
-  border-color: #a6e3d6;
-  color: #2c7d6c;
+  background: #e9f7ee;
+  border-color: #6cbf86;
+  color: #2b6e41;
 }
 .diff-chip.d-normal {
-  background: var(--butter-l);
-  border-color: #f3dd92;
-  color: #9a7212;
+  background: var(--gold-l);
+  border-color: var(--gold-d);
+  color: #7a5200;
 }
 .diff-chip.d-challenge {
-  background: var(--pink-l);
-  border-color: #f6bfd5;
-  color: #b9466f;
+  background: var(--spell-ll);
+  border-color: var(--spell);
+  color: var(--spell-dd);
 }
 
 .stars {
@@ -190,10 +212,38 @@
   gap: 1px;
 }
 .stars .st {
-  color: #e9dfcf;
+  color: var(--rule-2);
   display: inline-flex;
 }
 .stars .st.on {
-  color: #f6bd28;
-  filter: drop-shadow(0 1px 0 #c8981a);
+  color: var(--gold);
+  filter: drop-shadow(0 1.5px 0 var(--gold-d));
+}
+
+/* 저장하기: 주 버튼은 아니지만 자주 쓰여서 보라 테두리로 한 단계 강조 */
+.btn-save {
+  border-color: var(--spell);
+  color: var(--spell-dd);
+  box-shadow: 0 3px 0 var(--spell-l);
+}
+/* 극장의 [재생]: 지팡이 금색 픽셀 버튼 (마법이 움직이는 순간) */
+.btn-accent {
+  --pc: var(--gold-d);
+  border: 0;
+  border-radius: 0;
+  margin: 3px;
+  background: var(--gold);
+  color: var(--ink);
+  box-shadow:
+    0 -3px 0 0 var(--pc),
+    0 3px 0 0 var(--pc),
+    -3px 0 0 0 var(--pc),
+    3px 0 0 0 var(--pc),
+    0 6px 0 0 var(--pc);
+}
+.btn-accent .icon {
+  color: var(--ink);
+}
+.btn-accent:hover:not(:disabled) {
+  background: #ffb514;
 }

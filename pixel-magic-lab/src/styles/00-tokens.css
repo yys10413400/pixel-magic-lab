@@ -1,46 +1,113 @@
 /* ─────────────────────────────────────────────
    픽셀 마법사 연구소 — 디자인 시스템
-   크림 아이보리 종이 + 라벤더 잉크 + 민트·핑크·버터 포인트
-   모든 카드·버튼·블록은 "도톰한 종이 스티커" 느낌으로 통일
+
+   주제: 마법 연구소의 실험 노트. 바탕은 모눈종이(픽셀의 격자), 글씨는 남색 잉크.
+   대표 모양: 계단처럼 깎인 "픽셀 모서리" — 블록, 도화지 틀, 주 버튼, 마법사 말풍선에만 씁니다.
+   색은 뜻을 가집니다: 이동=하늘, 색칠=장미, 색 바꾸기=호박, 반복=청록, 지우기=회색.
+   주 버튼(보라)은 화면마다 하나만.
    ───────────────────────────────────────────── */
 
 :root {
-  --cream: #fff8ec;
-  --paper: #fffdf8;
-  --paper-2: #fdf6ea;
-  --ink: #5a4034;
-  --ink-soft: #8c7262;
-  --ink-faint: #b9a593;
-  --line: #ecdfcb;
-  --line-2: #e2d2b9;
+  /* 바탕 · 잉크 */
+  --graph: #eef0fb; /* 모눈종이 */
+  --graph-line: #dfe3f6;
+  --sheet: #ffffff; /* 카드 */
+  --sheet-2: #f6f7fd;
+  --ink: #26225a; /* 남색 잉크 */
+  --ink-soft: #57538a;
+  --ink-faint: #6c6996; /* 흰 바탕에서 5:1 이상 */
+  --rule: #dcdff2; /* 테두리 */
+  --rule-2: #c7cbe8;
 
-  --lav: #a68be0;
-  --lav-d: #7a5fc6;
-  --lav-dd: #5e45a8;
-  --lav-l: #efe8fb;
-  --lav-ll: #f7f3fd;
-  --mint: #7fd8c8;
-  --mint-d: #3e9f8a;
-  --mint-l: #ddf6f0;
-  --pink: #f59cc1;
-  --pink-d: #d0628f;
-  --pink-l: #fde6f0;
-  --butter: #ffd85e;
-  --butter-d: #c8981a;
-  --butter-l: #fff4cf;
-  --coral: #e2655f;
-  --coral-l: #ffe4e0;
+  /* 마법 보라 (주 버튼, 선택) · 지팡이 금색 (커서, 별, 실행 중) */
+  --spell: #6447e8;
+  --spell-d: #4c31cc;
+  --spell-dd: #35209c;
+  --spell-l: #e8e3ff;
+  --spell-ll: #f4f1ff;
+  --gold: #ffc23d;
+  --gold-d: #c98a00;
+  --gold-l: #fff1c9;
+  --danger: #e0434e;
+  --danger-d: #b32631;
+  --danger-l: #ffe5e7;
 
-  --r-lg: 20px;
-  --r-md: 14px;
-  --r-sm: 10px;
-  --lift: 0 3px 0 rgba(90, 64, 52, 0.13);
-  --soft: 0 10px 24px rgba(90, 64, 52, 0.07);
+  /* 블록 종류 색 (채움 / 테두리 / 아이콘·글씨) */
+  --move: #dcedff;
+  --move-bd: #3d8de0;
+  --move-ink: #1d5fa8;
+  --paint: #ffe3ee;
+  --paint-bd: #e2477f;
+  --paint-ink: #a92359;
+  --color: #fff0c7;
+  --color-bd: #e19a0e;
+  --color-ink: #8a5a00;
+  --repeat: #d6f4ea;
+  --repeat-bd: #129a7a;
+  --repeat-ink: #0b6b55;
+  --erase: #ecebf4;
+  --erase-bd: #7a78a0;
+  --erase-ink: #4b4970;
+
+  /* 글자 크기 (최소 14px) */
+  --fs-xs: 14px;
+  --fs-sm: 15px;
+  --fs-md: 17px;
+  --fs-lg: 20px;
+  --fs-xl: 24px;
+  --fs-2xl: 30px;
+
+  /* 모양 */
+  --r-lg: 16px;
+  --r-md: 12px;
+  --r-sm: 8px;
+  --px: 3px; /* 픽셀 모서리 한 칸 */
+  --tap: 44px; /* 누르는 곳 최소 크기 */
+  --lift: 0 3px 0 rgba(38, 34, 90, 0.12);
+  --soft: 0 8px 22px rgba(38, 34, 90, 0.08);
 
   --font-ui: 'Jua', 'Gowun Dodum', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
   --font-body: 'Gowun Dodum', 'Jua', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
 
+  /* 예전 이름 (다른 파일에서 쓰는 변수를 새 색에 연결) */
+  --cream: var(--graph);
+  --paper: var(--sheet);
+  --paper-2: var(--sheet-2);
+  --line: var(--rule);
+  --line-2: var(--rule-2);
+  --lav: var(--spell);
+  --lav-d: var(--spell-d);
+  --lav-dd: var(--spell-dd);
+  --lav-l: var(--spell-l);
+  --lav-ll: var(--spell-ll);
+  --mint: #5fd1b4;
+  --mint-d: var(--repeat-ink);
+  --mint-l: var(--repeat);
+  --pink: #f27aa6;
+  --pink-d: var(--paint-ink);
+  --pink-l: var(--paint);
+  --butter: var(--gold);
+  --butter-d: var(--gold-d);
+  --butter-l: var(--gold-l);
+  --coral: var(--danger);
+  --coral-l: var(--danger-l);
+
   color-scheme: light;
+}
+
+/* 픽셀 모서리: 테두리를 상자 그림자로 그려서 네 귀퉁이가 한 칸씩 깎여 보여요.
+   --pc 테두리 색, --ps 아래 그림자 색 */
+.px-frame {
+  --pc: var(--ink);
+  --ps: rgba(38, 34, 90, 0.18);
+  border: 0;
+  border-radius: 0;
+  box-shadow:
+    0 calc(-1 * var(--px)) 0 0 var(--pc),
+    0 var(--px) 0 0 var(--pc),
+    calc(-1 * var(--px)) 0 0 0 var(--pc),
+    var(--px) 0 0 0 var(--pc),
+    0 calc(var(--px) * 2.4) 0 0 var(--ps);
 }
 
 * {
@@ -56,20 +123,29 @@ body,
 
 body {
   font-family: var(--font-body);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
   color: var(--ink);
-  background-color: var(--cream);
+  background-color: var(--graph);
+  /* 모눈종이: 작은 칸 24px, 굵은 칸 120px */
   background-image:
-    radial-gradient(circle at 12% 18%, rgba(166, 139, 224, 0.1) 0 2px, transparent 3px),
-    radial-gradient(circle at 78% 62%, rgba(245, 156, 193, 0.1) 0 2px, transparent 3px),
-    radial-gradient(circle at 45% 85%, rgba(127, 216, 200, 0.12) 0 2px, transparent 3px),
-    radial-gradient(circle, rgba(200, 180, 150, 0.16) 1px, transparent 1.5px);
+    linear-gradient(var(--graph-line) 1px, transparent 1px), linear-gradient(90deg, var(--graph-line) 1px, transparent 1px),
+    linear-gradient(rgba(100, 71, 232, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(100, 71, 232, 0.07) 1px, transparent 1px);
   background-size:
-    220px 220px,
-    260px 260px,
-    300px 300px,
-    22px 22px;
+    24px 24px,
+    24px 24px,
+    120px 120px,
+    120px 120px;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
 button,
@@ -89,8 +165,9 @@ button:disabled {
 }
 
 :focus-visible {
-  outline: 3px solid var(--lav);
+  outline: 3px solid var(--gold);
   outline-offset: 2px;
+  box-shadow: 0 0 0 6px rgba(38, 34, 90, 0.85);
 }
 
 [hidden] {
@@ -108,11 +185,20 @@ button:disabled {
 }
 
 .note {
-  font-size: 14px;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
-  line-height: 1.5;
+  line-height: 1.55;
   margin: 6px 0;
 }
 .note.center {
   text-align: center;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }

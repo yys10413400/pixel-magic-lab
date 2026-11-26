@@ -25,7 +25,7 @@ export function BlockPalette({ kinds, trashMode, suppressClick, onAdd, onBeginDr
       <div className="panel-title">
         <Icon name="wand" size={20} />
         <span>마법 블록</span>
-        <small>누르면 ✦ 자리에 들어가요 · 끌어 놓아도 돼요</small>
+        <small>누르거나 끌어다 놓아요</small>
       </div>
       {trashMode ? (
         <div className="trash-zone">

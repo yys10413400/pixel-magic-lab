@@ -39,7 +39,7 @@
 npm install          # 처음 한 번
 npm run dev          # 개발 서버 (http://localhost:5173)
 npm run check        # 한 번에: 타입 검사 + 코드 검사 + 형식 검사 + 단위·화면 테스트
-npm run test:e2e     # 브라우저 자동 테스트 (Playwright, 내 컴퓨터에서는 설치된 Edge 사용)
+npm run test:e2e     # 빌드 후 브라우저 자동 테스트 (Playwright, 내 컴퓨터에서는 설치된 Edge 사용)
 npm run build        # 배포용 빌드 → dist/
 npm run build:html   # HTML 파일 하나로 빌드 → pixel-magic-lab.html
 npm run format       # 코드 모양 맞추기 (Prettier)
@@ -127,6 +127,16 @@ GitHub에 올리면 Actions(`.github/workflows/ci.yml`)가 위 검사, 두 가�
 - 미션 기록 초기화 (확인 후)
 - 전체 화면 버튼, 효과음 끄기 버튼은 상단에 항상 있습니다.
 
+## 디자인 원칙
+
+- **주제: 마법 연구소의 실험 노트.** 바탕은 모눈종이예요. 픽셀도 격자라서 앱의 주제와 바로 이어져요. 글씨는 남색 잉크(`#26225a`)예요.
+- **대표 모양은 계단처럼 깎인 "픽셀 모서리" 하나.** 도화지 틀, 블록, 주 버튼, 마법사 말풍선, 팝업에만 써요. 나머지 카드와 보조 버튼은 조용한 둥근 모서리예요.
+- **색은 뜻을 가져요.** 이동은 하늘색, 색칠은 장미색, 색 바꾸기는 호박색, 반복은 청록색, 지우기는 회색이에요. 같은 색을 블록, 팔레트, 실행 표시에 똑같이 써요. 보라색(`#6447e8`)은 화면마다 하나뿐인 주 버튼(실행하기)에, 금색(`#ffc23d`)은 고른 블록, 실행 중인 블록, 별, 극장의 재생에만 써요.
+- **픽셀 마법사가 안내해요.** 직접 그린 16×16 픽셀 캐릭터가 미션 이야기, 성공, 실수를 말풍선으로 알려 주고, 표정(기본, 기쁨, 앗!)이 바뀔 때만 한 번 움직여요.
+- **블록은 퍼즐 조각.** 아래쪽 돌기가 다음 블록과 끼워져 보이고, 반복 블록은 ㄷ자 팔로 안쪽 블록을 감싸요.
+- **읽기 쉽게.** 글씨는 최소 14px, 누르는 곳은 최소 44px이고, 글씨 대비는 모두 4.5:1 이상이에요. 키보드로 누르면 금색과 남색 테두리가 보여요. 움직임 줄이기 설정을 따라요.
+- 디자인 값은 `src/styles/00-tokens.css`에 모여 있어요. 화면 사진은 개발 서버를 켠 뒤 `node scripts/screens.mjs http://localhost:5173 1366x768`로 찍어요(`screens/` 폴더).
+
 ## 6. 프로젝트 구조
 
 ```
@@ -140,6 +150,7 @@ src/
     missions.ts        미션 12개 (목표 그림, 사용 블록, 정답 예시, 힌트, 개념 소개)
     templates.ts       애니메이션 예시 템플릿
   components/
+    Wizard.tsx         픽셀 마법사 캐릭터와 말풍선 안내
     blocks/            블록 편집기
       BlockEditor.tsx  편집기 본체 (커서, 추가/삭제/옮기기, 단축키)
       BlockPalette.tsx 왼쪽 위 [마법 블록] 상자 (끌어 오는 동안은 휴지통)
@@ -161,7 +172,8 @@ src/
   styles/              화면 영역별 CSS (index.css가 순서대로 불러옴)
 tests/                 단위 테스트 (node)
 tests/ui/              화면 테스트 (jsdom + Testing Library)
-e2e/                   브라우저 테스트 (Playwright)
+e2e/                   브라우저 테스트 (Playwright, 빌드된 결과물로 시험)
+scripts/screens.mjs    화면 크기별 사진 찍기 (디자인 확인용)
 public/favicon.svg
 ```
 

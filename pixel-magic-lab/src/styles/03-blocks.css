@@ -1,4 +1,7 @@
-/* ── 블록 편집기 ─────────────────────────────── */
+/* ── 블록 편집기 ───────────────────────────────
+   블록은 픽셀 모서리 퍼즐 조각이에요. 아래쪽 돌기(nub)가 다음 블록에 끼워져 보여요.
+   왼쪽 색 타일 = 블록 종류 (이동·색칠·색 바꾸기·반복·지우기)
+   ─────────────────────────────────────────── */
 .col-blocks {
   overflow: hidden;
 }
@@ -12,261 +15,334 @@
 
 .panel-title {
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: baseline;
+  gap: 8px;
   font-family: var(--font-ui);
-  font-size: 18px;
-  color: var(--lav-dd);
-  margin-bottom: 6px;
+  font-size: var(--fs-lg);
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.panel-title .icon {
+  align-self: center;
+  color: var(--spell);
 }
 .panel-title small {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: var(--fs-xs);
   color: var(--ink-faint);
   margin-left: auto;
   white-space: nowrap;
 }
 
+/* 블록 종류별 색 */
+.blk-move,
+.k-up,
+.k-down,
+.k-left,
+.k-right {
+  --bg: var(--move);
+  --bd: var(--move-bd);
+  --ic: var(--move-ink);
+}
+.blk-paint {
+  --bg: var(--paint);
+  --bd: var(--paint-bd);
+  --ic: var(--paint-ink);
+}
+.blk-erase {
+  --bg: var(--erase);
+  --bd: var(--erase-bd);
+  --ic: var(--erase-ink);
+}
+.blk-color {
+  --bg: var(--color);
+  --bd: var(--color-bd);
+  --ic: var(--color-ink);
+}
+.blk-repeat {
+  --bg: var(--repeat);
+  --bd: var(--repeat-bd);
+  --ic: var(--repeat-ink);
+}
+
+/* ── 팔레트 (마법 블록 상자) ── */
 .palette {
   flex: none;
-  padding: 12px 12px 10px;
-  background: linear-gradient(var(--lav-ll), var(--paper));
-  border-bottom: 2px dashed var(--line);
-  border-radius: 18px 18px 0 0;
+  padding: 14px 14px 12px;
+  border-bottom: 2px solid var(--rule);
   position: relative;
-  min-height: 108px;
+  min-height: 112px;
 }
 .palette.trash-on {
-  background: var(--coral-l);
+  background: var(--danger-l);
 }
 .trash-zone {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  height: 92px;
-  border: 3px dashed var(--coral);
-  border-radius: 14px;
-  color: var(--coral);
+  height: 96px;
+  border: 3px dashed var(--danger);
+  border-radius: var(--r-md);
+  color: var(--danger-d);
   font-family: var(--font-ui);
-  font-size: 18px;
+  font-size: var(--fs-md);
 }
 .pal-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  gap: 10px 8px;
+  padding: 3px;
 }
 .pal-blk {
-  --bg: #fff;
-  --bd: #ddd;
-  --sh: #ccc;
-  --ic: var(--ink);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1px;
-  min-height: 50px;
-  padding: 3px 4px;
-  border-radius: 11px;
-  border: 2px solid var(--bd);
+  gap: 2px;
+  min-height: 54px;
+  padding: 4px;
   background: var(--bg);
-  box-shadow: 0 3px 0 var(--sh);
-  font-size: 15px;
+  color: var(--ic);
+  font-size: var(--fs-sm);
   line-height: 1.1;
   white-space: nowrap;
   user-select: none;
   touch-action: none;
-}
-.pal-blk .icon {
-  color: var(--ic);
+  border: 0;
+  border-radius: 0;
+  box-shadow:
+    0 -2px 0 0 var(--bd),
+    0 2px 0 0 var(--bd),
+    -2px 0 0 0 var(--bd),
+    2px 0 0 0 var(--bd),
+    0 5px 0 0 color-mix(in srgb, var(--bd) 45%, transparent);
+  transition: transform 0.1s;
 }
 .pal-blk:hover {
-  filter: brightness(1.03);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 .pal-blk:active {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--sh);
 }
 .pal-blk.k-repeat {
   grid-column: span 2;
   flex-direction: row;
-  gap: 6px;
+  gap: 8px;
 }
 
 .pal-colors {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 12px;
 }
 .pal-colors-label {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   font-family: var(--font-ui);
-  font-size: 15px;
-  color: #9a7212;
-  background: var(--butter-l);
-  border: 2px solid #f0c95a;
-  border-radius: 10px;
-  padding: 3px 8px;
+  font-size: var(--fs-sm);
+  color: var(--color-ink);
   white-space: nowrap;
+}
+.pal-colors-label .icon {
+  color: var(--color-bd);
 }
 .pal-swatches {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 4px;
+  gap: 5px;
   flex: 1;
 }
 .pal-sw {
-  height: 22px;
-  border-radius: 7px;
-  border: 2px solid rgba(90, 64, 52, 0.22);
-  box-shadow: 0 2px 0 rgba(90, 64, 52, 0.15);
+  height: 24px;
+  border: 0;
+  border-radius: 0;
+  box-shadow:
+    0 -2px 0 0 rgba(38, 34, 90, 0.35),
+    0 2px 0 0 rgba(38, 34, 90, 0.35),
+    -2px 0 0 0 rgba(38, 34, 90, 0.35),
+    2px 0 0 0 rgba(38, 34, 90, 0.35);
   touch-action: none;
 }
 .pal-sw:hover {
-  transform: translateY(-1px) scale(1.06);
+  transform: translateY(-2px);
 }
 
+/* ── 작업 공간 머리 ── */
 .ws-head {
   flex: none;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px 6px;
+  padding: 10px 14px 6px;
 }
 .ws-title {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   font-family: var(--font-ui);
-  font-size: 17px;
-  color: var(--lav-dd);
+  font-size: var(--fs-md);
+  color: var(--ink);
   white-space: nowrap;
+}
+.ws-title .icon {
+  color: var(--spell);
 }
 .ws-count {
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: var(--fs-xs);
   color: var(--ink-soft);
-  background: var(--paper-2);
-  border: 2px solid var(--line);
-  border-radius: 999px;
-  padding: 1px 9px;
   margin-left: auto;
   white-space: nowrap;
 }
 .ws-count b {
   font-weight: 400;
-  color: var(--lav-dd);
+  font-size: var(--fs-md);
+  color: var(--spell-d);
 }
 
+/* ── 작업 공간 ── */
 .workspace {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  margin: 0 8px 10px;
-  padding: 8px 8px 0;
-  border-radius: 14px;
-  background-color: #fffcf6;
-  background-image: radial-gradient(rgba(190, 168, 140, 0.28) 1px, transparent 1.4px);
-  background-size: 16px 16px;
-  border: 2px solid var(--line);
+  margin: 0 10px 10px;
+  padding: 10px 10px 0 12px;
+  border-radius: var(--r-md);
+  background-color: var(--sheet-2);
+  background-image: linear-gradient(var(--graph-line) 1px, transparent 1px), linear-gradient(90deg, var(--graph-line) 1px, transparent 1px);
+  background-size: 12px 12px;
+  border: 2px solid var(--rule);
   scrollbar-width: thin;
-  scrollbar-color: #d9cbf3 transparent;
+  scrollbar-color: var(--rule-2) transparent;
 }
 .workspace:focus-visible {
   outline-offset: -3px;
 }
 .workspace.dragging {
-  background-color: var(--lav-ll);
+  background-color: var(--spell-ll);
 }
 .ws-start {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   font-family: var(--font-ui);
-  font-size: 13px;
-  color: var(--mint-d);
-  background: var(--mint-l);
-  border: 2px solid #a6e3d6;
-  border-radius: 999px;
-  padding: 1px 10px 1px 7px;
-  margin-bottom: 6px;
+  font-size: var(--fs-xs);
+  color: var(--ink);
+  background: var(--gold-l);
+  padding: 3px 10px 3px 8px;
+  margin: 2px 0 12px 2px;
+  box-shadow:
+    0 -2px 0 0 var(--gold),
+    0 2px 0 0 var(--gold),
+    -2px 0 0 0 var(--gold),
+    2px 0 0 0 var(--gold);
+}
+.ws-start .icon {
+  color: var(--gold-d);
 }
 .ws-pad {
-  height: 40px;
+  height: 48px;
 }
 .ws-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  min-height: 140px;
-  border: 3px dashed #d9cbf3;
-  border-radius: 14px;
-  color: var(--lav-d);
+  gap: 6px;
+  min-height: 150px;
+  border: 3px dashed var(--rule-2);
+  border-radius: var(--r-md);
+  color: var(--ink-soft);
   text-align: center;
-  padding: 12px;
+  padding: 14px;
   font-family: var(--font-ui);
-  font-size: 17px;
+  font-size: var(--fs-md);
+  background: rgba(255, 255, 255, 0.7);
+}
+.ws-empty .icon {
+  color: var(--gold-d);
 }
 .ws-empty p {
   margin: 0;
+  max-width: 24em;
 }
 .ws-empty.on {
-  animation: softPulse 1.6s ease-in-out infinite;
+  border-color: var(--spell);
 }
 
+/* ── 블록 ── */
 .blist {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
+  padding: 3px 0 3px 3px;
 }
 
 .blk {
-  --bg: #fff;
-  --bd: #ddd;
-  --sh: #ccc;
-  --ic: var(--ink);
   display: flex;
   align-items: center;
-  gap: 6px;
-  min-height: 42px;
-  padding: 3px 8px 3px 3px;
-  border-radius: 12px;
-  border: 2px solid var(--bd);
+  gap: 8px;
+  min-height: 44px;
+  padding: 4px 10px 4px 4px;
   background: var(--bg);
-  box-shadow: 0 3px 0 var(--sh);
+  color: var(--ic);
   font-family: var(--font-ui);
-  font-size: 17px;
+  font-size: var(--fs-md);
   user-select: none;
   -webkit-user-select: none;
   cursor: grab;
   position: relative;
-  transition:
-    transform 0.12s,
-    box-shadow 0.12s,
-    background 0.12s;
   width: fit-content;
   max-width: 100%;
-  min-width: 180px;
+  min-width: 190px;
+  border: 0;
+  border-radius: 0;
+  --ring: 0 0 0 0 transparent;
+  box-shadow:
+    0 -2px 0 0 var(--bd),
+    0 2px 0 0 var(--bd),
+    -2px 0 0 0 var(--bd),
+    2px 0 0 0 var(--bd),
+    var(--ring);
+  transition: transform 0.12s;
 }
+/* 아래 돌기: 다음 블록과 끼워지는 퍼즐 조각 */
+.blk-nub {
+  position: absolute;
+  left: 18px;
+  bottom: -9px;
+  width: 22px;
+  height: 7px;
+  background: var(--bg);
+  box-shadow:
+    0 2px 0 0 var(--bd),
+    -2px 0 0 0 var(--bd),
+    2px 0 0 0 var(--bd);
+  z-index: 1;
+  pointer-events: none;
+}
+/* 왼쪽 색 타일 */
 .blk .blk-ico {
-  color: var(--ic);
-  display: inline-flex;
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  background: var(--bd);
+  color: #fff;
+  flex: none;
 }
 .blk-grip {
   display: inline-flex;
   color: var(--ic);
-  opacity: 0.45;
-  padding: 6px 1px;
+  opacity: 0.5;
+  padding: 8px 0;
   touch-action: none;
   cursor: grab;
+  margin-left: -2px;
 }
 .blk-label {
   white-space: nowrap;
@@ -275,238 +351,230 @@
   opacity: 0.35;
 }
 
-.blk-move {
-  --bg: #dcedfc;
-  --bd: #92c3e8;
-  --sh: #afd2ee;
-  --ic: #3a77ab;
-}
-.blk-paint {
-  --bg: #fde2ee;
-  --bd: #eea2c3;
-  --sh: #f4c0d6;
-  --ic: #c2477e;
-}
-.blk-erase {
-  --bg: #f0e8df;
-  --bd: #cdb7a1;
-  --sh: #dfcfbe;
-  --ic: #8b6a50;
-}
-.blk-color {
-  --bg: #fff2c4;
-  --bd: #eec95c;
-  --sh: #f4dd94;
-  --ic: #b4840f;
-}
-.blk-repeat {
-  --bg: #d6f4eb;
-  --bd: #82d0ba;
-  --sh: #a9e1d0;
-  --ic: #2f8f76;
-}
-
+/* 고른 블록: 금색 고리 */
 .blk.sel {
-  box-shadow:
-    0 3px 0 var(--sh),
-    0 0 0 3px var(--lav);
+  --ring: 0 0 0 5px var(--gold);
   z-index: 2;
 }
+/* 실행 중인 블록: 앞으로 살짝 나오고 왼쪽에 지팡이 화살표 */
 .blk.running {
-  transform: translateX(6px) scale(1.03);
-  box-shadow:
-    0 3px 0 var(--sh),
-    0 0 0 4px var(--butter),
-    0 0 18px rgba(255, 216, 94, 0.9);
+  transform: translateX(8px);
+  --ring: 0 0 0 5px var(--gold), 0 0 0 8px rgba(255, 194, 61, 0.35);
   z-index: 3;
 }
 .blk.running::before {
   content: '';
   position: absolute;
-  left: -15px;
+  left: -20px;
   top: 50%;
   margin-top: -7px;
   border: 7px solid transparent;
-  border-left: 9px solid var(--butter-d);
+  border-left: 10px solid var(--gold-d);
 }
 .blk.err {
-  --bg: var(--coral-l);
-  --bd: var(--coral);
-  --sh: #f2b3ad;
+  --bg: var(--danger-l);
+  --bd: var(--danger);
+  --ic: var(--danger-d);
   animation: shake 0.45s;
 }
 .blk.err::after {
   content: '!';
   position: absolute;
-  right: -9px;
-  top: -9px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--coral);
+  right: -11px;
+  top: -11px;
+  width: 24px;
+  height: 24px;
+  background: var(--danger);
   color: #fff;
   display: grid;
   place-items: center;
-  font-size: 15px;
-  border: 2px solid #fff;
+  font-size: var(--fs-sm);
+  box-shadow: 0 0 0 2px #fff;
+  z-index: 2;
 }
 .blk-err-msg {
-  margin: 4px 0 2px 10px;
-  padding: 7px 10px;
-  border-radius: 10px;
-  background: var(--coral-l);
-  border: 2px solid #f2b3ad;
-  color: #a23d38;
-  font-size: 14px;
-  line-height: 1.4;
+  margin: 10px 0 2px 12px;
+  padding: 8px 12px;
+  background: var(--danger-l);
+  color: var(--danger-d);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
   position: relative;
   max-width: 330px;
+  box-shadow:
+    0 -2px 0 0 var(--danger),
+    0 2px 0 0 var(--danger),
+    -2px 0 0 0 var(--danger),
+    2px 0 0 0 var(--danger);
 }
 .blk-err-msg b {
   display: inline-grid;
   place-items: center;
   width: 18px;
   height: 18px;
-  border-radius: 50%;
-  background: var(--coral);
+  background: var(--danger);
   color: #fff;
-  font-size: 12px;
-  margin-right: 3px;
+  font-size: 13px;
+  margin-right: 4px;
 }
 
+/* 고른 블록의 도구 */
 .blk-tools {
   display: inline-flex;
-  gap: 2px;
+  gap: 4px;
   margin-left: 6px;
-  padding-left: 6px;
-  border-left: 2px dotted rgba(90, 64, 52, 0.2);
+  padding-left: 8px;
+  border-left: 2px solid color-mix(in srgb, var(--bd) 35%, transparent);
 }
 .blk-tools .tool {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
-  border-radius: 8px;
-  border: 2px solid rgba(90, 64, 52, 0.15);
-  background: rgba(255, 255, 255, 0.85);
+  border-radius: var(--r-sm);
+  border: 2px solid color-mix(in srgb, var(--bd) 40%, transparent);
+  background: #fff;
   color: var(--ink-soft);
 }
 .blk-tools .tool:hover {
-  color: var(--lav-dd);
-  background: #fff;
+  color: var(--spell-d);
+  border-color: var(--spell);
 }
 .blk-tools .tool.del:hover {
-  color: var(--coral);
+  color: var(--danger);
+  border-color: var(--danger);
 }
 
+/* 반복 횟수 */
 .stepper {
   display: inline-flex;
   align-items: center;
   background: #fff;
   border: 2px solid var(--bd);
-  border-radius: 10px;
+  border-radius: var(--r-sm);
   overflow: hidden;
 }
 .stepper button {
-  width: 26px;
-  height: 30px;
+  width: 30px;
+  height: 34px;
   border: 0;
-  background: #f1fbf8;
+  background: color-mix(in srgb, var(--bg) 60%, #fff);
   color: var(--ic);
-  font-size: 20px;
+  font-size: var(--fs-lg);
   line-height: 1;
 }
-.stepper button:hover {
-  background: #c8efe3;
+.stepper button:hover:not(:disabled) {
+  background: var(--bg);
 }
 .stepper input {
-  width: 34px;
-  height: 30px;
+  width: 38px;
+  height: 34px;
   border: 0;
   text-align: center;
-  font-size: 18px;
+  font-size: var(--fs-lg);
   color: var(--ink);
   background: #fff;
 }
 
+/* 색 바꾸기 블록의 물감 고르기 */
 .color-pick {
   position: relative;
 }
 .swatch-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   border: 2px solid var(--bd);
   background: #fff;
-  border-radius: 10px;
-  padding: 2px 8px 2px 4px;
-  font-size: 15px;
-  min-height: 30px;
+  border-radius: var(--r-sm);
+  padding: 2px 10px 2px 4px;
+  font-size: var(--fs-sm);
+  min-height: 34px;
 }
 .color-pop {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 10px);
   left: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(6, 26px);
-  gap: 5px;
-  padding: 8px;
-  background: var(--paper);
-  border: 2.5px solid var(--line-2);
-  border-radius: 12px;
-  box-shadow: var(--soft), var(--lift);
+  grid-template-columns: repeat(6, 30px);
+  gap: 6px;
+  padding: 10px;
+  background: var(--sheet);
+  box-shadow:
+    0 -3px 0 0 var(--ink),
+    0 3px 0 0 var(--ink),
+    -3px 0 0 0 var(--ink),
+    3px 0 0 0 var(--ink),
+    0 10px 24px rgba(38, 34, 90, 0.2);
 }
 .pop-sw {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  border: 2px solid rgba(90, 64, 52, 0.25);
+  width: 30px;
+  height: 30px;
+  border: 2px solid rgba(38, 34, 90, 0.3);
 }
 .pop-sw.on {
-  outline: 3px solid var(--lav-d);
-  outline-offset: 1px;
+  outline: 3px solid var(--spell);
+  outline-offset: 2px;
 }
 
-/* 반복 블록: 민트색 C 모양 */
+/* ── 반복 블록: 청록색 ㄷ자 모양으로 안쪽 블록을 감싸요 ── */
 .brep {
   display: flex;
   flex-direction: column;
   width: fit-content;
   max-width: 100%;
-  min-width: 220px;
+  min-width: 230px;
 }
 .brep > .blk {
-  border-bottom-left-radius: 4px;
+  z-index: 1;
+}
+.brep > .blk > .blk-nub {
+  left: 34px;
 }
 .brep-body {
+  padding: 12px 0 12px 16px;
   margin-left: 0;
-  padding: 6px 0 6px 12px;
-  border-left: 12px solid #a9e1d0;
-  min-height: 30px;
+  min-height: 34px;
   position: relative;
+  border-left: 16px solid var(--repeat-bd);
+  box-shadow: -2px 0 0 0 var(--repeat-bd);
+}
+.brep-body::before {
+  /* 팔 안쪽의 줄무늬: 반복이 "돌아가는" 느낌 */
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  background: repeating-linear-gradient(180deg, transparent 0 6px, rgba(255, 255, 255, 0.28) 6px 9px);
 }
 .brep.live > .brep-body {
-  border-left-color: var(--butter);
+  border-left-color: var(--gold);
+  box-shadow: -2px 0 0 0 var(--gold-d);
 }
 .brep-foot {
-  height: 14px;
-  width: 100px;
-  background: #d6f4eb;
-  border: 2px solid #82d0ba;
-  border-radius: 0 0 10px 10px;
-  box-shadow: 0 3px 0 #a9e1d0;
+  height: 16px;
+  width: 120px;
+  background: var(--repeat-bd);
+  box-shadow:
+    0 2px 0 0 var(--repeat-bd),
+    -2px 0 0 0 var(--repeat-bd),
+    2px 0 0 0 var(--repeat-bd);
 }
 .brep.live > .brep-foot {
-  background: var(--butter-l);
+  background: var(--gold);
+  box-shadow:
+    0 2px 0 0 var(--gold-d),
+    -2px 0 0 0 var(--gold-d),
+    2px 0 0 0 var(--gold-d);
 }
 .loop-badge {
-  font-size: 14px;
-  background: var(--butter);
-  color: #6b4e09;
-  border-radius: 999px;
-  padding: 1px 8px;
-  border: 2px solid #e3b93a;
+  font-size: var(--fs-sm);
+  background: var(--gold);
+  color: var(--ink);
+  padding: 1px 9px;
   animation: pop 0.3s;
 }
 .loop-slot {
@@ -514,49 +582,56 @@
   align-items: center;
   gap: 4px;
   width: fit-content;
-  font-size: 13px;
-  color: var(--mint-d);
-  border: 2px dashed #a9e1d0;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 9px;
-  padding: 3px 10px;
+  min-height: 34px;
+  font-size: var(--fs-xs);
+  color: var(--repeat-ink);
+  border: 2px dashed var(--repeat-bd);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: var(--r-sm);
+  padding: 4px 12px;
 }
 .loop-slot.empty {
-  padding: 8px 12px;
+  padding: 8px 14px;
 }
 .loop-slot.on {
-  border-color: var(--lav);
-  color: var(--lav-dd);
-  background: var(--lav-ll);
+  border-style: solid;
+  border-color: var(--spell);
+  color: var(--spell-dd);
+  background: var(--spell-ll);
 }
 
+/* 다음 블록이 들어갈 곳 / 놓을 곳 */
 .ins-marker {
   display: flex;
   align-items: center;
   gap: 4px;
-  height: 18px;
+  height: 20px;
+  margin: -4px 0;
   font-family: var(--font-ui);
-  font-size: 12px;
-  color: var(--lav-d);
+  font-size: var(--fs-xs);
+  color: var(--ink);
   position: relative;
-  padding-left: 4px;
-  animation: softPulse 1.6s ease-in-out infinite;
+  padding-left: 2px;
+}
+.ins-marker .icon {
+  color: var(--gold-d);
 }
 .ins-marker::after {
   content: '';
   flex: 1;
-  height: 0;
-  border-top: 3px dashed var(--lav);
-  border-radius: 3px;
-  margin-left: 4px;
-  max-width: 160px;
+  height: 4px;
+  margin-left: 6px;
+  max-width: 150px;
+  background: repeating-linear-gradient(90deg, var(--gold) 0 6px, transparent 6px 10px);
 }
 .ins-marker.drop {
-  color: var(--pink-d);
-  animation: none;
+  color: var(--spell-d);
+}
+.ins-marker.drop .icon {
+  color: var(--spell);
 }
 .ins-marker.drop::after {
-  border-top: 4px solid var(--pink);
+  background: var(--spell);
 }
 
 .drag-ghost {
@@ -564,10 +639,10 @@
   z-index: 1000;
   pointer-events: none;
   min-width: 0;
-  opacity: 0.92;
+  opacity: 0.94;
   transform: rotate(-3deg);
-  box-shadow: 0 10px 20px rgba(90, 64, 52, 0.2);
-  padding: 6px 12px;
+  padding: 8px 14px;
+  filter: drop-shadow(0 10px 14px rgba(38, 34, 90, 0.25));
 }
 
 .editor-toast {
@@ -577,9 +652,8 @@
   bottom: 14px;
   background: var(--ink);
   color: #fff;
-  border-radius: 12px;
-  padding: 8px 12px;
-  font-size: 14px;
+  padding: 10px 14px;
+  font-size: var(--fs-xs);
   z-index: 30;
   animation: rise 0.25s;
 }
@@ -587,15 +661,18 @@
 /* 읽기 전용 블록 (정답 예시) */
 .ro-list .blk {
   cursor: default;
-  min-height: 34px;
-  font-size: 15px;
+  min-height: 38px;
+  font-size: var(--fs-sm);
   min-width: 0;
+}
+.ro-list .blk .blk-ico {
+  width: 28px;
+  height: 28px;
 }
 .times-ro {
   font-weight: 400;
   background: #fff;
-  border-radius: 6px;
   padding: 0 6px;
   margin-right: 2px;
-  border: 2px solid #82d0ba;
+  border: 2px solid var(--repeat-bd);
 }

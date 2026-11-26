@@ -4,6 +4,12 @@
   .topbar {
     height: 54px;
   }
+  .mode-tab {
+    height: 42px;
+  }
+  .mode-tab.on {
+    height: 46px;
+  }
   .logo {
     width: 38px;
     height: 38px;
@@ -85,8 +91,8 @@
     font-size: 19px;
   }
   .mode-tab {
-    padding: 6px 12px 6px 10px;
-    font-size: 16px;
+    padding: 0 12px 0 10px;
+    font-size: var(--fs-sm);
   }
   .panel-title small {
     display: none;

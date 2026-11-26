@@ -119,3 +119,32 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* 마법사: 성공하면 깡충, 실수하면 갸우뚱 (표정이 바뀔 때 한 번만) */
+@keyframes wizardHop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  35% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(0);
+  }
+  75% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes wizardTilt {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  30% {
+    transform: rotate(-8deg);
+  }
+  65% {
+    transform: rotate(5deg);
+  }
+}

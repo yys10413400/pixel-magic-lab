@@ -283,7 +283,7 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
           <div className="player-ctl">
             <button
               type="button"
-              className={'btn ' + (playing ? '' : 'btn-primary')}
+              className={'btn ' + (playing ? '' : 'btn-accent')}
               onClick={() => {
                 if (!playing) setPlayIdx(0);
                 setPlaying(!playing);
@@ -323,7 +323,7 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
             />
           </label>
           <div className="btn-grid">
-            <button type="button" className="btn btn-primary" onClick={save}>
+            <button type="button" className="btn btn-save" onClick={save}>
               <Icon name="save" size={18} /> 저장
             </button>
             <button

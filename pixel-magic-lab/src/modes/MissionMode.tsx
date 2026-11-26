@@ -4,8 +4,9 @@ import { BlockListView } from '../components/blocks/BlockList';
 import { PixelCanvas, PixelThumb, type DiffMark } from '../components/PixelCanvas';
 import { RunControls, StatusBar, Modal, Stars, Stamp, type ConfirmState } from '../components/ui';
 import { Icon } from '../components/Icon';
+import { WizardGuide, WizardSprite } from '../components/Wizard';
 import { useRunner } from '../components/useRunner';
-import { MISSION_DATA, getMission, starsFor, DIFFICULTY_LABEL, DIFFICULTY_GRADE, titleFor, type Difficulty } from '../data/missions';
+import { MISSION_DATA, getMission, starsFor, DIFFICULTY_LABEL, DIFFICULTY_GRADE, titleFor } from '../data/missions';
 import { countBlocks, parseProgram, cloneProgram, usesRepeat } from '../engine/program';
 import { diffGrids } from '../engine/interpreter';
 import type { Program, RunResult } from '../engine/types';
@@ -294,26 +295,29 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
             <PixelCanvas width={mission.width} height={mission.height} grid={mission.target} axes label="목표 그림" />
           </div>
         </div>
-        <div className="story">
-          <span className="learn-chip">
-            <Icon name="sparkle" size={14} /> {mission.learn}
-          </span>
-          <p>{mission.story}</p>
-        </div>
-        <div className={'feedback fb-' + (feedback?.kind ?? 'none')} aria-live="polite">
+        {/* 마법사가 미션 이야기를 들려주고, 실행 결과(성공 · 다른 칸 · 오류)를 알려줘요 */}
+        <WizardGuide
+          mood={feedback?.kind === 'success' ? 'happy' : feedback?.kind === 'fail' || feedback?.kind === 'error' ? 'oops' : 'idle'}
+          live
+          className={'mission-guide fb-' + (feedback?.kind ?? 'none')}
+        >
           {feedback ? (
-            <>
-              <span className="fb-ico">
-                <Icon name={feedback.kind === 'success' ? 'star' : feedback.kind === 'error' ? 'help' : 'eye'} size={20} />
-              </span>
-              <p>{feedback.text}</p>
-            </>
+            <p>{feedback.text}</p>
           ) : (
-            <p className="fb-idle">
-              블록 <b>{blocks}</b>개 사용 중 · 정답 예시는 <b>{par}</b>개{record ? ` · 내 최고 기록 ${record.bestBlocks}개` : ''}
-            </p>
+            <>
+              <span className="learn-chip">
+                <Icon name="sparkle" size={14} /> {mission.learn}
+              </span>
+              <p>{mission.story}</p>
+            </>
           )}
-        </div>
+        </WizardGuide>
+        <p className="block-meter">
+          블록 <b>{blocks}</b>개 사용 중
+          <span>
+            정답 예시 {par}개{record ? ` · 내 최고 ${record.bestBlocks}개` : ''}
+          </span>
+        </p>
         <div className="hint-box">
           <div className="hint-head">
             <h3>
@@ -349,46 +353,14 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
         className="mission-map"
         icon={<Icon name="map" size={24} />}
       >
-        {(['easy', 'normal', 'challenge'] as Difficulty[]).map((d) => (
-          <div className="map-group" key={d}>
-            <h3>
-              <span className={'diff-chip d-' + d}>{DIFFICULTY_LABEL[d]}</span> <small>{DIFFICULTY_GRADE[d]}</small>
-            </h3>
-            <div className="map-cards">
-              {MISSION_DATA.filter((m) => m.difficulty === d).map((m) => {
-                const r = progress.missions[m.id];
-                const open = isUnlocked(m.id);
-                return (
-                  <button
-                    type="button"
-                    key={m.id}
-                    className={'map-card' + (open ? '' : ' locked') + (m.id === mission.id ? ' current' : '') + (r ? ' done' : '')}
-                    disabled={!open}
-                    onClick={() => goMission(m.id)}
-                  >
-                    <span className="mc-thumb">
-                      <PixelThumb grid={m.target} width={m.width} height={m.height} />
-                      {!open && (
-                        <span className="mc-lock">
-                          <Icon name="lock" size={26} />
-                        </span>
-                      )}
-                    </span>
-                    <span className="mc-num">미션 {m.id}</span>
-                    <span className="mc-title">{m.title}</span>
-                    <span className="mc-learn">{m.learn}</span>
-                    {r ? <Stars n={r.stars} size={15} /> : <span className="mc-new">{open ? '도전!' : '잠김'}</span>}
-                    {r && (
-                      <span className="mc-stamp">
-                        <Stamp size={34} />
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+        <MissionTrail currentId={mission.id} records={progress.missions} isUnlocked={isUnlocked} onPick={goMission} />
+        <p className="trail-legend">
+          {(['easy', 'normal', 'challenge'] as const).map((d) => (
+            <span key={d}>
+              <span className={'diff-chip d-' + d}>{DIFFICULTY_LABEL[d]}</span> {DIFFICULTY_GRADE[d]}
+            </span>
+          ))}
+        </p>
         <p className="note center">미션을 성공하면 다음 미션이 열려요. 선생님 도구에서 모든 미션을 열 수 있어요.</p>
       </Modal>
 
@@ -440,11 +412,16 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
         {success && (
           <div className="success-body">
             <div className="succ-top">
-              <Stamp size={92} />
-              <div>
+              <span className="succ-wizard">
+                <WizardSprite mood="happy" size={112} />
+              </span>
+              <div className="succ-headline">
                 <h2>미션 성공!</h2>
-                <Stars n={success.stars} size={34} />
+                <Stars n={success.stars} size={36} />
               </div>
+              <span className="succ-stamp">
+                <Stamp size={78} />
+              </span>
             </div>
             <ul className="succ-facts">
               <li>
@@ -533,6 +510,81 @@ function ConceptArt({ id }: { id: number }) {
   return (
     <div className="concept-art">
       <PixelThumb grid={grid} width={w} height={rows.length} />
+    </div>
+  );
+}
+
+const TRAIL_COLS = 4;
+
+/**
+ * 미션 지도: 12개 미션을 지그재그 길로 이어요.
+ * 한 줄에 4개씩, 둘째 줄은 오른쪽에서 왼쪽으로 가서 길이 끊기지 않아요.
+ * 마법사는 지금 미션 위에 서 있어요.
+ */
+function MissionTrail(props: {
+  currentId: number;
+  records: Progress['missions'];
+  isUnlocked: (id: number) => boolean;
+  onPick: (id: number) => void;
+}) {
+  const rows = Math.ceil(MISSION_DATA.length / TRAIL_COLS);
+  const place = (i: number) => {
+    const row = Math.floor(i / TRAIL_COLS);
+    const k = i % TRAIL_COLS;
+    const col = row % 2 === 0 ? k : TRAIL_COLS - 1 - k;
+    return { row, col };
+  };
+  // 길: 각 칸 가운데를 차례로 잇는 선 (SVG 좌표 = 칸 수 × 100)
+  const points = MISSION_DATA.map((_, i) => {
+    const p = place(i);
+    return `${p.col * 100 + 50},${p.row * 100 + 50}`;
+  }).join(' ');
+  return (
+    <div className="trail" style={{ gridTemplateRows: `repeat(${rows}, 1fr)` }}>
+      <svg className="trail-path" viewBox={`0 0 ${TRAIL_COLS * 100} ${rows * 100}`} preserveAspectRatio="none" aria-hidden>
+        <polyline points={points} />
+      </svg>
+      {MISSION_DATA.map((m, i) => {
+        const { row, col } = place(i);
+        const r = props.records[m.id];
+        const open = props.isUnlocked(m.id);
+        const here = m.id === props.currentId;
+        return (
+          <button
+            type="button"
+            key={m.id}
+            className={'trail-stop d-' + m.difficulty + (open ? '' : ' locked') + (here ? ' current' : '') + (r ? ' done' : '')}
+            style={{ gridRow: row + 1, gridColumn: col + 1 }}
+            disabled={!open}
+            onClick={() => props.onPick(m.id)}
+            aria-label={`미션 ${m.id} ${m.title}, ${DIFFICULTY_LABEL[m.difficulty]}${r ? `, 별 ${r.stars}개` : open ? ', 도전할 수 있어요' : ', 잠겨 있어요'}`}
+            aria-current={here ? 'step' : undefined}
+          >
+            {here && (
+              <span className="trail-wizard" aria-hidden>
+                <WizardSprite size={40} />
+              </span>
+            )}
+            <span className="ts-thumb">
+              <PixelThumb grid={m.target} width={m.width} height={m.height} />
+              {!open && (
+                <span className="ts-lock">
+                  <Icon name="lock" size={22} />
+                </span>
+              )}
+            </span>
+            <span className="ts-num">{m.id}</span>
+            <span className="ts-title">{m.title}</span>
+            <span className="ts-meta">
+              {r ? (
+                <Stars n={r.stars} size={14} />
+              ) : (
+                <span className={'diff-chip d-' + m.difficulty}>{DIFFICULTY_LABEL[m.difficulty]}</span>
+              )}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }

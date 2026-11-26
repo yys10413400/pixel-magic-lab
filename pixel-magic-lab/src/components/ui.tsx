@@ -153,11 +153,8 @@ export function Modal({ open, title, onClose, children, className, footer, icon 
 }
 
 function ModalCorners() {
-  return (
-    <svg className="modal-corners" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden>
-      <path d="M2 12V2h10M88 2h10v10M98 88v10H88M12 98H2V88" />
-    </svg>
-  );
+  // 예전 장식 모서리. 지금은 팝업 자체가 픽셀 모서리 틀이라 그리지 않아요.
+  return null;
 }
 
 export interface ConfirmState {

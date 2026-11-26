@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from './components/Icon';
+import { WizardSprite } from './components/Wizard';
 import { ConfirmDialog, Modal, Stars, type ConfirmState } from './components/ui';
 import { MissionMode } from './modes/MissionMode';
 import { WorkshopMode } from './modes/WorkshopMode';
@@ -275,14 +276,9 @@ export default function App() {
 
 function Logo() {
   return (
-    <svg className="logo" viewBox="0 0 16 16" shapeRendering="crispEdges" aria-hidden>
-      <path fill="#a68be0" d="M7 1h2v2h1v2h1v2h1v2h1v2H3V9h1V7h1V5h1V3h1z" />
-      <path fill="#8d6fd0" d="M9 3h1v2h1v2h1v2h1v2h-2V9h-1V7H9V5H8V3z" />
-      <path fill="#ffd85e" d="M7 6h2v2H7z" />
-      <path fill="#fff3b0" d="M7 6h1v1H7z" />
-      <path fill="#6b4f3f" d="M2 11h12v2H2z" />
-      <path fill="#f59cc1" d="M13 2h1v1h-1zM1 5h1v1H1zM14 6h1v1h-1z" />
-    </svg>
+    <span className="logo">
+      <WizardSprite size={40} />
+    </span>
   );
 }
 

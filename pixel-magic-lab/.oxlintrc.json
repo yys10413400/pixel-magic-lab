@@ -40,6 +40,13 @@
       "rules": {
         "no-await-in-loop": "off"
       }
+    },
+    {
+      "files": ["scripts/**"],
+      "rules": {
+        "no-await-in-loop": "off",
+        "no-console": "off"
+      }
     }
   ]
 }
