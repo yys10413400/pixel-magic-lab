@@ -1,0 +1,5 @@
+# 줄바꿈은 항상 LF (Prettier 검사와 맞추기)
+* text=auto eol=lf
+*.png binary
+*.woff2 binary
+*.zip binary
