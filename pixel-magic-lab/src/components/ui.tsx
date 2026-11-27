@@ -1,10 +1,11 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { Icon } from './Icon';
 import type { RunnerView, RunStatus } from './useRunner';
 import { SPEED_LABEL } from './useRunner';
 import type { SpeedKey } from '../lib/storage';
 import { colorHex, colorName } from '../engine/palette';
 import { describeStep } from '../engine/interpreter';
+import { onRadioKeys, radioProps } from './radio';
 
 // ─────────────────────────────────────────────
 // 공통 UI 조각: 실행 버튼 묶음, 상태 표시줄, 팝업 창
@@ -55,17 +56,10 @@ export function RunControls(p: RunControlsProps) {
         <Icon name="clear" size={20} />
         초기화
       </button>
-      <div className="speed" role="radiogroup" aria-label="실행 속도">
+      <div className="speed" role="radiogroup" tabIndex={-1} onKeyDown={onRadioKeys} aria-label="실행 속도">
         <span className="speed-label">속도</span>
         {(['slow', 'normal', 'fast', 'instant'] as SpeedKey[]).map((s) => (
-          <button
-            type="button"
-            key={s}
-            role="radio"
-            aria-checked={p.speed === s}
-            className={p.speed === s ? 'on' : ''}
-            onClick={() => p.onSpeed(s)}
-          >
+          <button type="button" key={s} {...radioProps(p.speed === s)} className={p.speed === s ? 'on' : ''} onClick={() => p.onSpeed(s)}>
             {SPEED_LABEL[s]}
           </button>
         ))}
@@ -108,36 +102,85 @@ interface ModalProps {
   className?: string;
   footer?: ReactNode;
   icon?: ReactNode;
+  /** 제목이 없는 팝업의 이름 (화면 읽기 프로그램용) */
+  label?: string;
 }
 
-export function Modal({ open, title, onClose, children, className, footer, icon }: ModalProps) {
+/** 열려 있는 팝업 순서 (맨 위 팝업만 Esc 와 Tab 가두기를 처리해요) */
+const modalStack: symbol[] = [];
+const FOCUSABLE = 'button:not(:disabled), [href], input:not(:disabled), select, textarea, [tabindex]:not([tabindex="-1"])';
+
+export function Modal({ open, title, onClose, children, className, footer, icon, label }: ModalProps) {
   const ref = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  // onClose 가 그릴 때마다 새로 만들어져도 아래 effect 가 다시 돌지 않게 ref 로 들고 있어요
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
+
   useEffect(() => {
     if (!open) return;
+    const me = Symbol('modal');
+    modalStack.push(me);
     const prev = document.activeElement as HTMLElement | null;
     const t = window.setTimeout(() => {
-      const el = ref.current?.querySelector<HTMLElement>('[data-autofocus], .modal-foot button, button');
+      // 우선순위대로 찾아요 (querySelector 에 한꺼번에 넣으면 문서 순서상 맨 위 [닫기]가 먼저 잡혀요)
+      const root = ref.current;
+      const el = ['[data-autofocus]', '.modal-foot button', '.modal-body button', 'button']
+        .map((sel) => root?.querySelector<HTMLElement>(sel))
+        .find((x) => x);
       el?.focus();
     }, 30);
     const key = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && onClose) onClose();
+      if (modalStack[modalStack.length - 1] !== me) return;
+      if (e.key === 'Escape' && closeRef.current) {
+        e.stopPropagation();
+        closeRef.current();
+        return;
+      }
+      // Tab 을 팝업 안에서만 돌게 해요
+      if (e.key === 'Tab' && ref.current) {
+        const items = Array.from(ref.current.querySelectorAll<HTMLElement>(FOCUSABLE)).filter((el) => el.offsetParent !== null);
+        if (items.length === 0) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        const inside = ref.current.contains(document.activeElement);
+        if (e.shiftKey && (document.activeElement === first || !inside)) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener('keydown', key);
     return () => {
       window.clearTimeout(t);
       window.removeEventListener('keydown', key);
+      const i = modalStack.indexOf(me);
+      if (i >= 0) modalStack.splice(i, 1);
       prev?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
+
   if (!open) return null;
   return (
     <div className="modal-back" onPointerDown={(e) => e.target === e.currentTarget && onClose?.()}>
-      <div className={'modal ' + (className ?? '')} role="dialog" aria-modal="true" ref={ref}>
+      <div
+        className={'modal ' + (className ?? '')}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        aria-label={title ? undefined : (label ?? '알림')}
+        ref={ref}
+      >
         <ModalCorners />
         {(title || onClose) && (
           <div className="modal-head">
             {icon}
-            <h2>{title}</h2>
+            <h2 id={titleId}>{title}</h2>
             {onClose && (
               <button type="button" className="btn-icon" onClick={onClose} aria-label="닫기">
                 <Icon name="close" size={20} />

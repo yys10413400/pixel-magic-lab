@@ -20,6 +20,7 @@ import {
 import { exportPng } from '../lib/exporters';
 import { play } from '../lib/sound';
 import type { ModeHandle } from '../App';
+import { onRadioKeys, radioProps } from '../components/radio';
 
 interface Props {
   active: boolean;
@@ -286,16 +287,9 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
                 onChange={(e) => (setName(e.target.value), setDirty(true))}
               />
             </label>
-            <div className="seg size-seg" role="radiogroup" aria-label="도화지 크기">
+            <div className="seg size-seg" role="radiogroup" tabIndex={-1} onKeyDown={onRadioKeys} aria-label="도화지 크기">
               {CANVAS_SIZES.map((n) => (
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={size === n}
-                  key={n}
-                  className={size === n ? 'on' : ''}
-                  onClick={() => changeSize(n)}
-                >
+                <button type="button" {...radioProps(size === n)} key={n} className={size === n ? 'on' : ''} onClick={() => changeSize(n)}>
                   {n}×{n}
                 </button>
               ))}

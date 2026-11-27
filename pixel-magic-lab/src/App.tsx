@@ -25,10 +25,10 @@ export interface ModeHandle {
   save: () => boolean;
 }
 
-const MODES: { key: ModeKey; label: string; sub: string; icon: 'map' | 'brush' | 'film' }[] = [
-  { key: 'mission', label: '마법 따라 그리기', sub: '미션', icon: 'map' },
-  { key: 'workshop', label: '자유 픽셀 공방', sub: '창작', icon: 'brush' },
-  { key: 'theater', label: '움직이는 픽셀 극장', sub: '애니메이션', icon: 'film' },
+const MODES: { key: ModeKey; label: string; short: string; sub: string; icon: 'map' | 'brush' | 'film' }[] = [
+  { key: 'mission', label: '마법 따라 그리기', short: '미션', sub: '미션', icon: 'map' },
+  { key: 'workshop', label: '자유 픽셀 공방', short: '공방', sub: '창작', icon: 'brush' },
+  { key: 'theater', label: '움직이는 픽셀 극장', short: '극장', sub: '애니메이션', icon: 'film' },
 ];
 
 export default function App() {
@@ -123,6 +123,9 @@ export default function App() {
             >
               <Icon name={m.icon} size={22} />
               <span className="mt-label">{m.label}</span>
+              <span className="mt-short" aria-hidden>
+                {m.short}
+              </span>
             </button>
           ))}
         </nav>

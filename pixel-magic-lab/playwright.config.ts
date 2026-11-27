@@ -11,6 +11,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: ci,
   retries: ci ? 1 : 0,
+  // 브라우저를 너무 많이 동시에 띄우면 느린 컴퓨터에서 시간 초과가 나요
+  workers: ci ? 2 : 3,
   reporter: ci ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,

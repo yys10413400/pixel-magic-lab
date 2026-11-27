@@ -75,6 +75,9 @@
 .mode-tab:hover {
   color: var(--ink);
 }
+.mt-short {
+  display: none;
+}
 .mode-tab.on {
   background: var(--sheet);
   color: var(--ink);

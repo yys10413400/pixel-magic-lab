@@ -22,6 +22,7 @@ import { exportGif, exportSpriteSheet } from '../lib/exporters';
 import { TEMPLATES, blankProject, projectFromTemplate } from '../data/templates';
 import { play } from '../lib/sound';
 import type { ModeHandle } from '../App';
+import { onRadioKeys, radioProps } from '../components/radio';
 
 interface Props {
   active: boolean;
@@ -249,16 +250,9 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
               <input type="checkbox" checked={onion} onChange={(e) => setOnion(e.target.checked)} />
               <Icon name="onion" size={18} /> 앞 장면 비춰보기
             </label>
-            <div className="seg size-seg" role="radiogroup" aria-label="도화지 크기">
+            <div className="seg size-seg" role="radiogroup" tabIndex={-1} onKeyDown={onRadioKeys} aria-label="도화지 크기">
               {CANVAS_SIZES.map((n) => (
-                <button
-                  type="button"
-                  role="radio"
-                  aria-checked={size === n}
-                  key={n}
-                  className={size === n ? 'on' : ''}
-                  onClick={() => changeSize(n)}
-                >
+                <button type="button" {...radioProps(size === n)} key={n} className={size === n ? 'on' : ''} onClick={() => changeSize(n)}>
                   {n}×{n}
                 </button>
               ))}
@@ -296,12 +290,11 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
               <Icon name="loop" size={16} /> 반복 재생
             </label>
           </div>
-          <div className="seg fps-seg" role="radiogroup" aria-label="재생 속도">
+          <div className="seg fps-seg" role="radiogroup" tabIndex={-1} onKeyDown={onRadioKeys} aria-label="재생 속도">
             {FPS_OPTIONS.map((o) => (
               <button
                 type="button"
-                role="radio"
-                aria-checked={project.fps === o.fps}
+                {...radioProps(project.fps === o.fps)}
                 key={o.fps}
                 className={project.fps === o.fps ? 'on' : ''}
                 onClick={() => update((p) => ({ ...p, fps: o.fps }))}
@@ -399,10 +392,14 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
               key={f.id}
               className={'fs-item' + (i === index ? ' on' : '') + (playing && i === shownPlay ? ' playing' : '')}
               onClick={() => setCur(i)}
-              aria-label={`${i + 1}번 장면`}
+              aria-current={i === index ? 'true' : undefined}
             >
               <PixelThumb grid={rendered[i]} width={size} height={size} />
-              <span className="fs-num">{i + 1}</span>
+              {/* 보이는 숫자와 읽어 주는 이름이 같도록 "1번 장면" 을 글자로 넣어요 */}
+              <span className="fs-num">
+                {i + 1}
+                <span className="sr-only">번 장면</span>
+              </span>
               {countBlocks(f.program) > 0 && (
                 <span className="fs-code" title="이 장면에는 코드 블록이 있어요">
                   <Icon name="code" size={11} />

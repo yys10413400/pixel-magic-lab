@@ -57,7 +57,8 @@ export default defineConfig(({ mode }) => {
   const outDir = single ? 'build-single-tmp' : 'dist';
   return {
     base: './',
-    plugins: [react(), classicScript(), ...(single ? [woff2Only(), inlineIntoHtml(outDir)] : [])],
+    // woff2Only: 모든 최신 브라우저가 woff2 를 읽어요. 옛 woff 대체 파일을 빼서 글꼴 규칙 크기를 줄여요.
+    plugins: [react(), classicScript(), woff2Only(), ...(single ? [inlineIntoHtml(outDir)] : [])],
     build: {
       outDir,
       target: 'es2019',

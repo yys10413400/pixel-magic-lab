@@ -192,8 +192,39 @@
   .theater-mode .frame-strip {
     grid-row: 4;
   }
+  /* 휴대폰: 모드 탭은 화면 폭을 나눠 쓰고 짧은 이름으로 */
+  .mode-tabs {
+    width: 100%;
+  }
+  .mode-tab {
+    flex: 1;
+    justify-content: center;
+    padding: 0 8px;
+  }
+  /* 긴 이름은 화면 읽기 프로그램용으로만 남겨요 */
   .mt-label {
-    font-size: 14px;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .mt-short {
+    display: inline;
+  }
+  .tool-tip {
+    display: none;
+  }
+  .stage-head,
+  .tool-row {
+    flex-wrap: wrap;
+  }
+  .run-controls {
+    flex-wrap: wrap;
+  }
+  .speed {
+    margin-left: 0;
   }
   .brand-text h1 {
     font-size: 17px;

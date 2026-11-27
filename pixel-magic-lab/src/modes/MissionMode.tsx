@@ -408,7 +408,7 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
       </Modal>
 
       {/* 성공 */}
-      <Modal open={!!success} className="success" onClose={() => setSuccess(null)}>
+      <Modal open={!!success} className="success" label="미션 성공" onClose={() => setSuccess(null)}>
         {success && (
           <div className="success-body">
             <div className="succ-top">
@@ -557,7 +557,6 @@ function MissionTrail(props: {
             style={{ gridRow: row + 1, gridColumn: col + 1 }}
             disabled={!open}
             onClick={() => props.onPick(m.id)}
-            aria-label={`미션 ${m.id} ${m.title}, ${DIFFICULTY_LABEL[m.difficulty]}${r ? `, 별 ${r.stars}개` : open ? ', 도전할 수 있어요' : ', 잠겨 있어요'}`}
             aria-current={here ? 'step' : undefined}
           >
             {here && (
@@ -573,7 +572,10 @@ function MissionTrail(props: {
                 </span>
               )}
             </span>
-            <span className="ts-num">{m.id}</span>
+            <span className="ts-num">
+              <span className="sr-only">미션 </span>
+              {m.id}
+            </span>
             <span className="ts-title">{m.title}</span>
             <span className="ts-meta">
               {r ? (
@@ -581,6 +583,7 @@ function MissionTrail(props: {
               ) : (
                 <span className={'diff-chip d-' + m.difficulty}>{DIFFICULTY_LABEL[m.difficulty]}</span>
               )}
+              {!r && <span className="sr-only">{open ? ', 도전할 수 있어요' : ', 잠겨 있어요'}</span>}
             </span>
           </button>
         );

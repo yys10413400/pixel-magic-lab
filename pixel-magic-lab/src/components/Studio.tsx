@@ -9,6 +9,7 @@ import { PALETTE } from '../engine/palette';
 import type { BlockKind, ColorKey, Grid, Program } from '../engine/types';
 import type { SpeedKey } from '../lib/storage';
 import { play } from '../lib/sound';
+import { onRadioKeys, radioProps } from './radio';
 
 // ─────────────────────────────────────────────
 // 창작 스튜디오 (자유 공방 · 픽셀 극장 공용)
@@ -109,20 +110,13 @@ export function Studio(p: Props) {
       <section className="card col-stage">
         <div className="stage-head">{p.stageHead}</div>
         <div className="tool-row">
-          <div className="seg" role="radiogroup" aria-label="그리기 방법">
-            <button
-              type="button"
-              role="radio"
-              aria-checked={tool === 'code'}
-              className={tool === 'code' ? 'on' : ''}
-              onClick={() => setTool('code')}
-            >
+          <div className="seg" role="radiogroup" tabIndex={-1} onKeyDown={onRadioKeys} aria-label="그리기 방법">
+            <button type="button" {...radioProps(tool === 'code')} className={tool === 'code' ? 'on' : ''} onClick={() => setTool('code')}>
               <Icon name="code" size={18} /> 코드로 그리기
             </button>
             <button
               type="button"
-              role="radio"
-              aria-checked={tool === 'brush'}
+              {...radioProps(tool === 'brush')}
               className={tool === 'brush' ? 'on' : ''}
               onClick={() => setTool('brush')}
               title="손으로 칠한 칸은 '밑그림'이 되고, 코드는 그 위에 그려져요"
@@ -131,8 +125,7 @@ export function Studio(p: Props) {
             </button>
             <button
               type="button"
-              role="radio"
-              aria-checked={tool === 'eraser'}
+              {...radioProps(tool === 'eraser')}
               className={tool === 'eraser' ? 'on' : ''}
               onClick={() => setTool('eraser')}
             >
@@ -140,11 +133,12 @@ export function Studio(p: Props) {
             </button>
           </div>
           {tool === 'brush' ? (
-            <div className="hand-palette" role="listbox" aria-label="손 그림 물감">
+            <div className="hand-palette" role="radiogroup" aria-label="손 그림 물감" tabIndex={-1} onKeyDown={onRadioKeys}>
               {PALETTE.map((c) => (
                 <button
                   type="button"
                   key={c.key}
+                  {...radioProps(handColor === c.key)}
                   className={'hp-sw' + (handColor === c.key ? ' on' : '')}
                   style={{ background: c.hex }}
                   title={c.name}
