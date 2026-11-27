@@ -1,6 +1,9 @@
-name: 검사
+name: 검사와 배포
 
 # main 에 올리거나 PR 을 열 때마다: 타입 검사 · 코드 검사 · 형식 · 단위/화면 테스트 · 빌드 · 브라우저 테스트
+# main 에 올렸고 모두 통과하면: GitHub Pages 에 배포
+#   https://yys10413400.github.io/pixel-magic-lab/                     ← 빠른 일반 빌드 (dist)
+#   https://yys10413400.github.io/pixel-magic-lab/pixel-magic-lab.html ← 한 파일 HTML (예전 주소도 그대로 열려요)
 on:
   push:
     branches: [main]
@@ -47,3 +50,29 @@ jobs:
           name: playwright-report
           path: pixel-magic-lab/playwright-report
           retention-days: 7
+      - name: 배포할 사이트 모으기 (dist + 한 파일 HTML)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          rm -rf ../site
+          cp -r dist ../site
+          cp pixel-magic-lab.html ../site/pixel-magic-lab.html
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          path: site
+
+  deploy:
+    needs: check
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v6
+      - id: deployment
+        uses: actions/deploy-pages@v5

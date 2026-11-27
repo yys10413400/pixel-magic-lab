@@ -52,7 +52,10 @@ npm run format       # 코드 모양 맞추기 (Prettier)
 | `npm run format:check` | 코드 모양이 Prettier 규칙과 맞는지                      |
 | `npm test`             | 단위 테스트(node) + 화면 테스트(jsdom, Testing Library) |
 
-GitHub에 올리면 Actions(`.github/workflows/ci.yml`)가 위 검사, 두 가지 빌드, 브라우저 테스트(Chromium)를 자동으로 돌립니다.
+GitHub에 올리면 Actions(`.github/workflows/ci.yml`)가 위 검사, 두 가지 빌드, 브라우저 테스트(Chromium)를 자동으로 돌리고, main에서 모두 통과하면 GitHub Pages에 배포합니다.
+
+- 빠른 일반 빌드: https://yys10413400.github.io/pixel-magic-lab/
+- 한 파일 HTML: https://yys10413400.github.io/pixel-magic-lab/pixel-magic-lab.html
 
 코드 검사에서 끈 규칙과 이유: `prefer-tag-over-role`(버튼 묶음의 radiogroup/radio와 직접 만든 대화상자는 올바른 ARIA 패턴), `no-array-sort`(복사본만 정렬), `consistent-function-scoping`(스타일 규칙), 테스트 안의 `no-await-in-loop`(클릭은 순서대로 해야 함). typescript-eslint는 아직 TypeScript 7을 지원하지 않아 oxlint를 씁니다.
 
