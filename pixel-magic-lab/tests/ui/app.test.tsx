@@ -5,7 +5,7 @@ import App from '../../src/App';
 
 // 앱 전체를 띄워서 아이가 하는 순서대로 눌러 봐요 (속도는 '바로'로 저장해 두고 시작)
 function start() {
-  localStorage.setItem('pml.settings.v1', JSON.stringify({ muted: true, speed: 'instant' }));
+  localStorage.setItem('pml.settings.v1', JSON.stringify({ muted: true, speed: 'instant', welcomed: true }));
   const user = userEvent.setup();
   render(<App />);
   return user;

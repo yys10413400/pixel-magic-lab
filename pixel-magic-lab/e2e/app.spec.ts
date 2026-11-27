@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { closeConcept, expectNoPageScroll, goMode, openApp } from './helpers';
+import { closeConcept, expectNoPageScroll, goMode, openApp, openTeacher } from './helpers';
 
 test.describe('첫 화면과 세 가지 모드', () => {
   test('오류 없이 열리고, 1366×768 에서 모드마다 페이지가 스크롤되지 않아요', async ({ page }, info) => {
@@ -72,5 +72,42 @@ test.describe('공방과 극장', () => {
     const stream = await d.createReadStream();
     const head = await new Promise<Buffer>((res) => stream.once('data', (c) => res(c as Buffer)));
     expect(head.subarray(0, 6).toString('ascii')).toBe('GIF89a');
+  });
+});
+
+test.describe('처음 안내와 선생님 비밀번호', () => {
+  test('처음 열면 짧은 안내가 나오고 [코딩 시작!]을 누르면 시작해요. 다음부터는 안 나와요', async ({ page }) => {
+    await openApp(page, { muted: true, welcomed: false });
+    const welcome = page.getByRole('dialog', { name: '이렇게 놀아요' });
+    await expect(welcome).toBeVisible();
+    await expect(welcome.getByRole('button', { name: '코딩 시작!' })).toBeFocused();
+    await welcome.getByRole('button', { name: '코딩 시작!' }).click();
+    // 안내를 닫으면 미션 1의 개념 카드가 이어서 나와요
+    await expect(page.getByRole('button', { name: '알겠어요!' })).toBeVisible();
+    await page.reload();
+    await expect(page.getByRole('dialog', { name: '이렇게 놀아요' })).toHaveCount(0);
+    // [?] 버튼으로 다시 볼 수 있어요
+    await page.getByRole('button', { name: '알겠어요!' }).click();
+    await page.getByRole('button', { name: '사용 방법' }).click();
+    await expect(page.getByRole('dialog', { name: '이렇게 놀아요' })).toBeVisible();
+  });
+
+  test('선생님 도구는 비밀번호를 만들고, 다음부터는 맞는 비밀번호로만 열려요', async ({ page }, info) => {
+    test.skip(info.project.name !== 'desktop', '한 번만 확인');
+    await openApp(page);
+    await closeConcept(page);
+    const dialog = await openTeacher(page, '7788');
+    await expect(dialog.getByText('미션 진행 현황')).toBeVisible();
+    await page.keyboard.press('Escape');
+    // 다시 열면 잠겨 있어요
+    await page.getByRole('button', { name: '선생님 도구' }).click();
+    const d2 = page.getByRole('dialog', { name: '선생님 도구' });
+    await d2.getByLabel('비밀번호', { exact: true }).fill('0000');
+    await d2.getByRole('button', { name: '열기' }).click();
+    await expect(d2.getByRole('alert')).toHaveText(/비밀번호가 달라요/);
+    await expect(d2.getByText('미션 진행 현황')).toHaveCount(0);
+    await d2.getByLabel('비밀번호', { exact: true }).fill('7788');
+    await d2.getByRole('button', { name: '열기' }).click();
+    await expect(d2.getByText('미션 진행 현황')).toBeVisible();
   });
 });

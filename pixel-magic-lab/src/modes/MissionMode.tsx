@@ -6,7 +6,7 @@ import { RunControls, StatusBar, Modal, Stars, Stamp, type ConfirmState } from '
 import { Icon } from '../components/Icon';
 import { WizardGuide, WizardSprite } from '../components/Wizard';
 import { useRunner, canStepBack } from '../components/useRunner';
-import { MISSION_DATA, getMission, starsFor, DIFFICULTY_LABEL, DIFFICULTY_GRADE, CHAPTERS, titleFor } from '../data/missions';
+import { MISSION_DATA, getMission, starsFor, DIFFICULTY_LABEL, titleFor } from '../data/missions';
 import { countBlocks, parseProgram, cloneProgram, usesRepeat } from '../engine/program';
 import { diffGrids } from '../engine/interpreter';
 import type { Program, RunResult } from '../engine/types';
@@ -368,17 +368,6 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
         icon={<Icon name="map" size={24} />}
       >
         <MissionTrail currentId={mission.id} records={progress.missions} isUnlocked={isUnlocked} onPick={goMission} />
-        <ul className="trail-legend">
-          {CHAPTERS.map((c) => {
-            const ids = MISSION_DATA.filter((m) => m.chapter === c.id).map((m) => m.id);
-            return (
-              <li key={c.id}>
-                <span className={'diff-chip d-' + c.difficulty}>{DIFFICULTY_GRADE[c.difficulty]}</span>
-                <b>{c.title}</b> 미션 {ids[0]}~{ids[ids.length - 1]} · {c.learn}
-              </li>
-            );
-          })}
-        </ul>
         <p className="note center">미션을 성공하면 다음 미션이 열려요. 선생님 도구에서 모든 미션을 열 수 있어요.</p>
       </Modal>
 

@@ -3,7 +3,7 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(47, 43, 79, 0.42);
+  background: rgba(34, 48, 63, 0.42);
   display: grid;
   place-items: center;
   padding: 16px;
@@ -18,7 +18,7 @@
   flex-direction: column;
   background: var(--sheet);
   border-radius: var(--r-xl);
-  box-shadow: 0 24px 60px rgba(47, 43, 79, 0.22);
+  box-shadow: 0 24px 60px rgba(34, 48, 63, 0.22);
   animation: popIn 0.22s cubic-bezier(0.3, 1.3, 0.6, 1);
 }
 .modal-head {
@@ -82,7 +82,7 @@
 }
 .trail-path polyline {
   fill: none;
-  stroke: #e4dcfa;
+  stroke: #d8e4ee;
   stroke-width: 14;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -107,13 +107,13 @@
   border-radius: 20px;
   box-shadow:
     inset 0 0 0 2px var(--rule),
-    0 4px 0 #e2def2;
+    0 4px 0 #dde5ee;
 }
 .trail-stop:hover:not(:disabled) {
   transform: translateY(-2px);
 }
 .trail-stop.done {
-  background: #fbfaff;
+  background: #fafcfd;
 }
 .trail-stop.current {
   background: var(--spell-ll);
@@ -536,4 +536,151 @@
 /* 잠긴 미션은 투명하게 만들지 않아요 (뒤의 길이 비쳐 보이지 않게) */
 .trail-stop:disabled {
   opacity: 1;
+}
+
+/* ── 처음 안내: 세 걸음 + [코딩 시작!] ── */
+.modal.welcome {
+  width: min(760px, calc(100% - 8px));
+}
+.welcome-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 6px 0 4px;
+}
+.wl-step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 26px 12px 18px;
+  background: var(--sheet-2);
+  border-radius: 22px;
+  text-align: center;
+}
+.wl-num {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-lg);
+  box-shadow: 0 3px 0 var(--gold-d);
+}
+.wl-pic {
+  min-height: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.wl-pic .pal-blk {
+  flex-direction: row;
+  gap: 6px;
+  min-height: 40px;
+  min-width: 120px;
+  padding: 4px 12px;
+}
+.wl-pic .btn-run {
+  height: 48px;
+  font-size: var(--fs-lg);
+}
+.wl-step p {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--fs-lg);
+  line-height: 1.35;
+  color: var(--ink);
+}
+.welcome .modal-foot {
+  justify-content: center;
+}
+.btn-start {
+  min-height: 56px;
+  padding: 0 34px;
+  font-size: var(--fs-xl);
+}
+
+/* ── 선생님 비밀번호 ── */
+.teacher-lock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 360px;
+  margin: 6px auto 12px;
+  text-align: center;
+}
+.teacher-lock h3 {
+  margin: 0;
+  font-size: var(--fs-lg);
+}
+.tl-ico {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 999px;
+  background: var(--spell-ll);
+  color: var(--spell-d);
+}
+.tl-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.tl-field span {
+  flex: none;
+  width: 4.5em;
+  text-align: right;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+.tl-field input {
+  flex: 1;
+  min-width: 0;
+  height: var(--tap);
+  border: 0;
+  border-radius: 999px;
+  padding: 0 16px;
+  background: var(--sheet-2);
+  font-size: var(--fs-lg);
+  letter-spacing: 0.2em;
+}
+.tl-field input:focus {
+  outline: 3px solid var(--spell);
+  outline-offset: 1px;
+}
+.tl-error {
+  margin: 0;
+  color: var(--danger-d);
+  font-size: var(--fs-sm);
+}
+.teacher-wide {
+  grid-column: 1 / -1;
+}
+.rules-list {
+  margin: 6px 0 12px;
+  padding-left: 20px;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .welcome-steps {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
 }

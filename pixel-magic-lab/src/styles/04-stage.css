@@ -122,7 +122,7 @@
   height: 26px;
   border-radius: 8px;
   border: 0;
-  box-shadow: inset 0 0 0 2px rgba(47, 43, 79, 0.12);
+  box-shadow: inset 0 0 0 2px rgba(34, 48, 63, 0.12);
 }
 .hp-sw.on {
   outline: 3px solid var(--lav-d);
@@ -160,10 +160,10 @@
   fill: #ffffff;
 }
 .cell-empty.b {
-  fill: #f7f5fd;
+  fill: #f4f7fa;
 }
 .cell-fill {
-  stroke: rgba(47, 43, 79, 0.22);
+  stroke: rgba(34, 48, 63, 0.22);
   stroke-width: 0.4;
 }
 .cell-fill.pop {
@@ -172,21 +172,21 @@
 /* 칸 전체의 바깥 경계 (가장자리 칸도 셀 수 있게) */
 .grid-edge {
   fill: none;
-  stroke: #d8d2ee;
+  stroke: #d1dce7;
   stroke-width: 0.6;
 }
 .grid-lines line {
-  stroke: #e3e0f0;
+  stroke: #e0e7ee;
   stroke-width: 0.45;
 }
 /* 도화지 틀: 둥근 연보라 쿠션 (칸은 픽셀 그대로) */
 .canvas-frame {
   fill: #ffffff;
-  stroke: #ddd5f7;
+  stroke: #d4e0eb;
   stroke-width: 0.9;
 }
 .canvas-frame-shadow {
-  fill: #e4dcfa;
+  fill: #d8e4ee;
 }
 .axis-label {
   fill: var(--ink-faint);
@@ -295,8 +295,8 @@
   color: var(--spell-dd);
 }
 .st-done .st-chip {
-  background: var(--repeat);
-  color: var(--repeat-ink);
+  background: var(--spell-l);
+  color: var(--spell-d);
 }
 .st-error .st-chip {
   background: var(--danger-l);
@@ -370,7 +370,7 @@
   background: var(--sheet);
   box-shadow:
     inset 0 0 0 2px var(--rule),
-    0 3px 0 #e2def2;
+    0 3px 0 #dde5ee;
   font-size: var(--fs-xs);
   color: var(--ink-soft);
   white-space: nowrap;
@@ -415,7 +415,7 @@
 .speed button.on {
   background: var(--sheet);
   color: var(--ink);
-  box-shadow: 0 2px 0 #dcd6ee;
+  box-shadow: 0 2px 0 #d6e0ea;
 }
 
 /* 성공 별빛 */

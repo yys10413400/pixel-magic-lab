@@ -60,12 +60,14 @@ export interface Settings {
   speed: SpeedKey;
   /** 공방·극장에서 고급 블록(만약, 나만의 블록) 보이기 — 선생님 도구에서 켜요 */
   advanced: boolean;
+  /** 처음 안내 팝업을 봤는지 */
+  welcomed: boolean;
 }
 export type SpeedKey = 'slow' | 'normal' | 'fast' | 'instant';
 export function loadSettings(): Settings {
   const s = read<Partial<Settings>>(KEYS.settings, {});
   const speed: SpeedKey = s.speed === 'slow' || s.speed === 'fast' || s.speed === 'instant' ? s.speed : 'normal';
-  return { muted: !!s.muted, speed, advanced: !!s.advanced };
+  return { muted: !!s.muted, speed, advanced: !!s.advanced, welcomed: !!s.welcomed };
 }
 export function saveSettings(s: Settings) {
   write(KEYS.settings, s);

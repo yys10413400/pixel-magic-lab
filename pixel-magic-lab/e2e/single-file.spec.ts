@@ -12,6 +12,7 @@ test('한 파일 HTML 을 더블클릭하듯 열어도 작동해요', async ({ p
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(pathToFileURL(file).href);
+  await page.getByRole('button', { name: '코딩 시작!' }).click();
   await page.getByRole('button', { name: '알겠어요!' }).click();
   for (const name of ['오른쪽', '오른쪽', '아래로', '아래로', '색칠하기']) await page.getByRole('button', { name, exact: true }).click();
   await page.getByRole('button', { name: /실행하기/ }).click();

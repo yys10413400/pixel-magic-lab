@@ -53,7 +53,7 @@
   gap: 4px;
   margin: 0 auto;
   padding: 5px;
-  background: #e9e5f7;
+  background: #e3eaf1;
   border-radius: 999px;
 }
 .mode-tab {
@@ -81,7 +81,7 @@
 .mode-tab.on {
   background: var(--sheet);
   color: var(--ink);
-  box-shadow: 0 3px 0 #d6d0ec;
+  box-shadow: 0 3px 0 #d1dbe6;
 }
 .mode-tab.on .icon {
   color: var(--spell);
@@ -140,7 +140,7 @@
 }
 .btn-icon:active:not(:disabled) {
   transform: translateY(2px);
-  box-shadow: 0 1px 0 #e2def2;
+  box-shadow: 0 1px 0 #dde5ee;
 }
 
 .stage-area {

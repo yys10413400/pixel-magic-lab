@@ -10,14 +10,14 @@ import type { ReactNode } from 'react';
 export type WizardMood = 'idle' | 'happy' | 'oops';
 
 const COLORS: Record<string, string> = {
-  K: '#26225a', // 테두리
-  H: '#6447e8', // 모자
-  h: '#4c31cc', // 모자 그늘
+  K: '#22303f', // 테두리
+  H: '#2f7fd8', // 모자 (파랑)
+  h: '#1f5fae', // 모자 그늘
   Y: '#ffc23d', // 별
   S: '#ffdcc0', // 얼굴
   C: '#f78fb3', // 볼
-  R: '#3d8de0', // 옷
-  r: '#2a6cba', // 옷 그늘
+  R: '#23a06f', // 옷 (초록)
+  r: '#187a53', // 옷 그늘
   W: '#9a6440', // 지팡이
   D: '#7cc3f0', // 땀방울
 };

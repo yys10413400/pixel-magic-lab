@@ -57,7 +57,7 @@
   position: relative;
   margin: 0 0 4px;
   padding: 12px 14px;
-  background: var(--spell-ll);
+  background: var(--move);
   border-radius: 18px 18px 18px 6px;
   font-size: var(--fs-sm);
   line-height: 1.55;
@@ -70,7 +70,7 @@
   margin-top: 6px;
 }
 .bubble-happy {
-  background: var(--repeat);
+  background: var(--spell-l);
 }
 .bubble-oops {
   background: var(--gold-l);
@@ -199,7 +199,7 @@
   aspect-ratio: 1;
   align-self: center;
   border-radius: 14px;
-  box-shadow: 0 0 0 5px #ece7fb;
+  box-shadow: 0 0 0 5px #e2ebf3;
   overflow: hidden;
   background: #fff;
 }
@@ -262,7 +262,7 @@
   align-self: center;
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 0 0 6px #e4dcfa;
+  box-shadow: 0 0 0 6px #d8e4ee;
   overflow: hidden;
 }
 .curtain {
@@ -439,5 +439,5 @@
 .side-sec.tip .btn-mini {
   background: var(--sheet);
   color: var(--spell-dd);
-  box-shadow: 0 2px 0 #e2def2;
+  box-shadow: 0 2px 0 #dde5ee;
 }

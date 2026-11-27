@@ -15,6 +15,15 @@ const page = await browser.newPage({ viewport: { width: w, height: h }, locale: 
 const tag = `${w}x${h}`;
 const shot = (name) => page.screenshot({ path: `${out}/${tag}-${name}.png` });
 const click = (name, exact = true) => page.getByRole('button', { name, exact }).first().click();
+/** 선생님 도구 열기: 처음이면 비밀번호 1234 를 만들고, 있으면 넣어요 */
+const openTeacher = async () => {
+  await page.getByRole('button', { name: '선생님 도구' }).click();
+  const d = page.getByRole('dialog', { name: '선생님 도구' });
+  await d.getByLabel('비밀번호', { exact: true }).fill('1234');
+  const again = d.getByLabel('한 번 더');
+  if (await again.isVisible()) await again.fill('1234');
+  await d.getByRole('button', { name: /비밀번호 정하기|열기/ }).click();
+};
 
 await page.addInitScript(() => {
   if (!sessionStorage.getItem('shots')) {
@@ -24,6 +33,8 @@ await page.addInitScript(() => {
   }
 });
 await page.goto(url);
+await shot('00-welcome');
+await click('코딩 시작!');
 await shot('01-concept');
 await click('알겠어요!');
 await shot('02-mission');
@@ -72,7 +83,7 @@ await page.getByRole('button', { name: '사용 방법' }).click();
 await page.waitForTimeout(300);
 await shot('09-help');
 await page.keyboard.press('Escape');
-await page.getByRole('button', { name: '선생님 도구' }).click();
+await openTeacher();
 await page.waitForTimeout(300);
 await shot('10-teacher');
 await page.keyboard.press('Escape');
@@ -91,7 +102,7 @@ await page
   .getByRole('navigation', { name: '모드 선택' })
   .getByRole('button', { name: /마법 따라 그리기/ })
   .click();
-await page.getByRole('button', { name: '선생님 도구' }).click();
+await openTeacher();
 await page.getByText('모든 미션 바로 열기').click();
 await page.keyboard.press('Escape');
 for (const [id, name] of [

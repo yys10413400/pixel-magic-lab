@@ -1,6 +1,6 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { closeConcept, goMode, openApp } from './helpers';
+import { closeConcept, goMode, openApp, openTeacher } from './helpers';
 
 // 자동 접근성 검사 (axe-core, WCAG 2.1 A·AA 규칙)
 async function scan(page: Page, where: string) {
@@ -10,6 +10,8 @@ async function scan(page: Page, where: string) {
 }
 
 test('세 모드와 주요 팝업에 접근성 위반이 없어요', async ({ page }, info) => {
+  // 화면 8개를 훑어서 시간이 걸려요 (느린 컴퓨터에서도 넉넉하게)
+  test.setTimeout(60_000);
   test.skip(info.project.name !== 'desktop', '한 번만 확인');
   await openApp(page);
   const all: string[] = [];
@@ -26,7 +28,9 @@ test('세 모드와 주요 팝업에 접근성 위반이 없어요', async ({ pa
   await page.getByRole('button', { name: '사용 방법' }).click();
   all.push(...(await scan(page, '사용 방법')));
   await page.keyboard.press('Escape');
-  await page.getByRole('button', { name: '선생님 도구' }).click();
+  all.push(...(await scan(page, '선생님 도구 비밀번호')));
+  await page.keyboard.press('Escape');
+  await openTeacher(page);
   all.push(...(await scan(page, '선생님 도구')));
   expect(all).toEqual([]);
 });

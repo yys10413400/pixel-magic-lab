@@ -1,32 +1,31 @@
 /* ─────────────────────────────────────────────
-   픽셀 마법사 연구소 — 디자인 시스템 "말랑한 마법 사탕"
+   픽셀 마법사 연구소 — 디자인 시스템 "햇살 운동장"
 
-   귀엽지만 깔끔하게: 바탕은 무늬 없는 연한 라벤더 한 가지 색, 테두리 선은 거의 쓰지 않아요.
-   대표 질감: 사탕 그림자 — 버튼·블록 아래에 같은 색의 진한 띠(3~4px)를 깔아 말랑하게 눌리는 느낌.
-     흐린 회색 그림자는 카드에 아주 옅게만 써요.
-   모서리는 역할마다: 카드 24 · 블록 14 · 버튼 14 · 칩은 동그랗게. 픽셀 모양은 도화지 칸과 마법사에만.
-   색은 뜻을 가집니다: 이동=하늘, 색칠=분홍, 색 바꾸기=노랑, 반복=민트, 지우기=회색.
-   주 버튼(보라)은 화면마다 하나만.
+   귀엽지만 깔끔하게: 바탕은 무늬 없는 맑은 하늘빛 회색 한 가지, 테두리 선은 거의 쓰지 않아요.
+   대표 질감: 사탕 그림자 — 버튼·블록 아래에 같은 색의 진한 띠(3~5px)를 깔아 말랑하게 눌리는 느낌.
+   모서리는 역할마다: 팝업 28 · 카드 24 · 블록/버튼 14 · 칩은 동그랗게. 픽셀 모양은 도화지 칸과 마법사에만.
+   주 버튼은 신호등의 "출발" 초록 — 화면마다 하나([실행하기]).
+   블록 색은 뜻을 가집니다: 이동=하늘 · 색칠=분홍 · 색=노랑 · 반복=주황 · 만약=청록 · 나만의 블록=나무 · 지우기=회색.
    ───────────────────────────────────────────── */
 
 :root {
   /* 바탕 · 잉크 */
-  --graph: #f3f1fb; /* 바탕: 연한 라벤더 */
-  --graph-line: #e6e2f5;
+  --graph: #eef3f7; /* 바탕: 연한 라벤더 */
+  --graph-line: #e0e8ef;
   --sheet: #ffffff; /* 카드 */
-  --sheet-2: #f7f6fc; /* 카드 안 칸 */
-  --ink: #2f2b4f; /* 글씨 */
-  --ink-soft: #625e86;
-  --ink-faint: #6e6a92; /* 흰 바탕에서 5:1 이상 */
-  --rule: #ebe8f6; /* 옅은 칸막이 */
-  --rule-2: #dcd8ee;
+  --sheet-2: #f4f7fa; /* 카드 안 칸 */
+  --ink: #22303f; /* 글씨 */
+  --ink-soft: #536275;
+  --ink-faint: #637387; /* 흰 바탕에서 5:1 이상 */
+  --rule: #e3e9f0; /* 옅은 칸막이 */
+  --rule-2: #d2dce6;
 
-  /* 마법 보라 (주 버튼, 선택) · 지팡이 금색 (커서, 별, 실행 중) */
-  --spell: #7457f0;
-  --spell-d: #5b3fd6;
-  --spell-dd: #4a2fbf;
-  --spell-l: #ebe6ff;
-  --spell-ll: #f5f2ff;
+  /* 출발 초록 (주 버튼, 고른 블록) · 지팡이 금색 (커서, 별, 실행 중) */
+  --spell: #127a51; /* 흰 글씨 5.3:1 */
+  --spell-d: #0e6544;
+  --spell-dd: #0a5236;
+  --spell-l: #d8f1e5;
+  --spell-ll: #ecf8f2;
   --gold: #ffc94d;
   --gold-d: #d99a12;
   --gold-l: #fff3d1;
@@ -48,24 +47,24 @@
   --color-bd: #f2b02e;
   --color-sh: #f6dc9c;
   --color-ink: #855800;
-  --repeat: #dcf6ee;
-  --repeat-bd: #2bb894;
-  --repeat-sh: #a9e5d3;
-  --repeat-ink: #0e6a54;
+  --repeat: #ffeedd;
+  --repeat-bd: #f08a24;
+  --repeat-sh: #f6cfa4;
+  --repeat-ink: #8a4300;
   --erase: #efeef6;
   --erase-bd: #8f8cb0;
   --erase-sh: #d3d1e4;
   --erase-ink: #4b4970;
   /* 만약 (생각하는 블록): 연보라 */
-  --logic: #ece7ff;
-  --logic-bd: #8a6cf2;
-  --logic-sh: #d3c9fb;
-  --logic-ink: #4a2fb3;
+  --logic: #dcf3f6;
+  --logic-bd: #139aae;
+  --logic-sh: #a6dde5;
+  --logic-ink: #0a5d6a;
   /* 나만의 블록: 주황 */
-  --func: #ffeadb;
-  --func-bd: #f2853a;
-  --func-sh: #f8caa6;
-  --func-ink: #8f3f07;
+  --func: #f5ebdf;
+  --func-bd: #a8703e;
+  --func-sh: #e0cbb2;
+  --func-ink: #6a3f1d;
 
   /* 글자 크기 (최소 14px) */
   --fs-xs: 14px;
@@ -81,8 +80,8 @@
   --r-md: 14px; /* 버튼 · 블록 */
   --r-sm: 10px; /* 작은 버튼 · 입력 칸 */
   --tap: 44px; /* 누르는 곳 최소 크기 */
-  --lift: 0 3px 0 #e2def2; /* 흰 버튼의 사탕 그림자 */
-  --soft: 0 1px 2px rgba(47, 43, 79, 0.04), 0 10px 30px rgba(47, 43, 79, 0.06);
+  --lift: 0 3px 0 #dde5ee; /* 흰 버튼의 사탕 그림자 */
+  --soft: 0 1px 2px rgba(34, 48, 63, 0.05), 0 10px 30px rgba(34, 48, 63, 0.07);
 
   --font-ui: 'Jua', 'Gowun Dodum', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
   --font-body: 'Gowun Dodum', 'Jua', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
@@ -98,9 +97,9 @@
   --lav-dd: var(--spell-dd);
   --lav-l: var(--spell-l);
   --lav-ll: var(--spell-ll);
-  --mint: #5fd1b4;
-  --mint-d: var(--repeat-ink);
-  --mint-l: var(--repeat);
+  --mint: var(--spell);
+  --mint-d: var(--spell-d);
+  --mint-l: var(--spell-l);
   --pink: #f27aa6;
   --pink-d: var(--paint-ink);
   --pink-l: var(--paint);
