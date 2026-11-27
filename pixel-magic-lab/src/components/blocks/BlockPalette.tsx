@@ -1,8 +1,8 @@
 import type { PointerEvent as ReactPointerEvent, RefObject } from 'react';
-import type { BlockKind, ColorKey } from '../../engine/types';
+import type { BlockKind, ColorKey, DefineBlock } from '../../engine/types';
 import { PALETTE } from '../../engine/palette';
 import { Icon } from '../Icon';
-import { KIND_INFO, PAL_LABEL } from './blockMeta';
+import { KIND_INFO, PAL_LABEL, WIDE_KINDS } from './blockMeta';
 import type { DragSrc } from './useBlockDrag';
 
 // 왼쪽 위 [마법 블록] 상자: 누르면 추가, 끌면 원하는 자리에 놓기.
@@ -10,13 +10,15 @@ import type { DragSrc } from './useBlockDrag';
 
 interface Props {
   kinds: BlockKind[];
+  /** 작업 공간에 만든 나만의 블록들 (쓰기 블록으로 보여 줘요) */
+  defines: DefineBlock[];
   trashMode: boolean;
   suppressClick: RefObject<boolean>;
-  onAdd: (kind: BlockKind, color?: ColorKey) => void;
+  onAdd: (kind: BlockKind | 'call', color?: ColorKey, defId?: string) => void;
   onBeginDrag: (e: ReactPointerEvent, src: DragSrc, label: string, cls: string) => void;
 }
 
-export function BlockPalette({ kinds, trashMode, suppressClick, onAdd, onBeginDrag }: Props) {
+export function BlockPalette({ kinds, defines, trashMode, suppressClick, onAdd, onBeginDrag }: Props) {
   const showKinds = kinds.filter((k) => k !== 'color');
   const hasColor = kinds.includes('color');
 
@@ -39,7 +41,7 @@ export function BlockPalette({ kinds, trashMode, suppressClick, onAdd, onBeginDr
               <button
                 type="button"
                 key={k}
-                className={'pal-blk blk-' + KIND_INFO[k].cls + ' k-' + k}
+                className={'pal-blk blk-' + KIND_INFO[k].cls + ' k-' + k + (WIDE_KINDS.includes(k) ? ' wide' : '')}
                 onPointerDown={(e) => onBeginDrag(e, { type: 'palette', kind: k }, KIND_INFO[k].label, KIND_INFO[k].cls)}
                 onClick={() => !suppressClick.current && onAdd(k)}
               >
@@ -48,6 +50,22 @@ export function BlockPalette({ kinds, trashMode, suppressClick, onAdd, onBeginDr
               </button>
             ))}
           </div>
+          {defines.length > 0 && (
+            <div className="pal-calls" aria-label="내가 만든 블록">
+              {defines.map((d) => (
+                <button
+                  type="button"
+                  key={d.id}
+                  className="pal-blk blk-func"
+                  onPointerDown={(e) => onBeginDrag(e, { type: 'palette', kind: 'call', defId: d.id }, d.name, 'func')}
+                  onClick={() => !suppressClick.current && onAdd('call', undefined, d.id)}
+                >
+                  <Icon name="magic" size={20} />
+                  <span>{d.name.trim() || '나만의 블록'}</span>
+                </button>
+              ))}
+            </div>
+          )}
           {hasColor && (
             <div className="pal-colors">
               <span className="pal-colors-label">

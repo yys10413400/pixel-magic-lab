@@ -20,7 +20,7 @@ describe('앱 전체 흐름', () => {
     await user.click(screen.getByRole('button', { name: /실행하기/ }));
     expect(await screen.findByRole('heading', { name: '미션 성공!' })).toBeInTheDocument();
     // 성공 기록이 저장돼요
-    const progress = JSON.parse(localStorage.getItem('pml.progress.v1') ?? '{}');
+    const progress = JSON.parse(localStorage.getItem('pml.progress.v2') ?? '{}');
     expect(progress.missions?.['1']?.stars).toBe(3);
   });
 

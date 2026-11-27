@@ -1,11 +1,23 @@
 import { createContext, Fragment, useContext, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import type { Block, LoopFrame, Program, RepeatBlock } from '../../engine/types';
+import type { Block, DefineBlock, IfBlock, IfCond, LoopFrame, Program, RepeatBlock } from '../../engine/types';
+import { ELSE_SUFFIX } from '../../engine/program';
 import { PALETTE, colorHex, colorName } from '../../engine/palette';
 import { Icon } from '../Icon';
-import { REPEAT_MAX, REPEAT_MIN, REPEAT_TYPED_MAX, blockCls, blockIcon, blockLabel } from './blockMeta';
+import {
+  COND_LABEL,
+  DEFINE_NAME_MAX,
+  REPEAT_MAX,
+  REPEAT_MIN,
+  REPEAT_TYPED_MAX,
+  blockCls,
+  blockIcon,
+  blockLabel,
+  type NameOf,
+} from './blockMeta';
 import type { DragSrc } from './useBlockDrag';
 
-// 작업 공간 안의 블록 목록 (반복 블록은 안에 목록을 품어요)
+// 작업 공간 안의 블록 목록
+// 그릇 블록(반복 · 만약 · 나만의 블록 만들기)은 안에 목록을 품어요
 
 export interface EditorCtx {
   selectedId: string | null;
@@ -26,6 +38,9 @@ export interface EditorCtx {
   setTimes: (id: string, times: number) => void;
   setColor: (id: string, color: string) => void;
   toggleColorPop: (id: string) => void;
+  setCond: (id: string, cond: IfCond) => void;
+  setName: (id: string, name: string) => void;
+  nameOf: NameOf;
   beginDrag: (e: ReactPointerEvent, src: DragSrc, label: string, cls: string) => void;
 }
 
@@ -47,7 +62,16 @@ export function InsertMarker({ kind }: { kind: 'drop' | 'cursor' }) {
   );
 }
 
-export function BlockList({ blocks, listId }: { blocks: Program; listId: string | null }) {
+/** 그릇 안 빈자리에 보여 줄 안내 */
+export type SlotKind = 'repeat' | 'yes' | 'no' | 'define';
+const SLOT_TEXT: Record<SlotKind, string> = {
+  repeat: '반복할 블록을 여기에 넣어요',
+  yes: '맞을 때 할 일을 넣어요',
+  no: '아닐 때 할 일을 넣어요',
+  define: '나만의 블록에 넣을 블록',
+};
+
+export function BlockList({ blocks, listId, slot = 'repeat' }: { blocks: Program; listId: string | null; slot?: SlotKind }) {
   const ed = useEditor();
   const endMarker = ed.markerAt(listId, blocks.length);
   return (
@@ -72,7 +96,7 @@ export function BlockList({ blocks, listId }: { blocks: Program; listId: string 
           onClick={() => ed.setCursorEnd(listId)}
         >
           <Icon name="plus" size={14} />
-          {blocks.length === 0 ? '반복할 블록을 여기에 넣어요' : '안에 더 넣기'}
+          {blocks.length === 0 ? SLOT_TEXT[slot] : '안에 더 넣기'}
         </button>
       )}
     </div>
@@ -215,8 +239,8 @@ function BlockItem({ block: b, index, listId }: { block: Block; index: number; l
     role: 'group' as const,
     tabIndex: 0,
     'aria-roledescription': '블록',
-    'aria-label': blockLabel(b) + (isSel ? ' (골랐어요)' : ''),
-    onPointerDown: (e: ReactPointerEvent) => ed.beginDrag(e, { type: 'block', id: b.id }, blockLabel(b), blockCls(b)),
+    'aria-label': blockLabel(b, ed.nameOf) + (isSel ? ' (골랐어요)' : ''),
+    onPointerDown: (e: ReactPointerEvent) => ed.beginDrag(e, { type: 'block', id: b.id }, blockLabel(b, ed.nameOf), blockCls(b)),
     onClick: () => ed.select(b.id),
     onKeyDown: (e: React.KeyboardEvent) => {
       if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) {
@@ -238,10 +262,14 @@ function BlockItem({ block: b, index, listId }: { block: Block; index: number; l
     </span>
   );
 
+  const box = { cls, rowProps, grip, errBubble, isSel, isActive, listId, index };
+  if (b.type === 'if') return <IfItem block={b} {...box} />;
+  if (b.type === 'define') return <DefineItem block={b} {...box} />;
+
   if (b.type === 'repeat') {
     const lf = ed.loops.get(b.id);
     return (
-      <div className={'brep' + (isActive || lf ? ' live' : '')}>
+      <div className={'brep cnt-repeat' + (isActive || lf ? ' live' : '')}>
         <div className={cls} {...rowProps} data-head="1">
           {grip}
           <span className="blk-ico">
@@ -278,7 +306,7 @@ function BlockItem({ block: b, index, listId }: { block: Block; index: number; l
             <ColorPicker id={b.id} color={b.color} />
           </>
         ) : (
-          <span className="blk-label">{blockLabel(b)}</span>
+          <span className="blk-label">{blockLabel(b, ed.nameOf)}</span>
         )}
         {isSel && <BlockTools id={b.id} />}
       </div>
@@ -287,46 +315,160 @@ function BlockItem({ block: b, index, listId }: { block: Block; index: number; l
   );
 }
 
-/** 읽기 전용 블록 목록 (정답 예시 보기용) */
-export function BlockListView({ program }: { program: Program }) {
+interface ContainerProps<T> {
+  block: T;
+  cls: string;
+  rowProps: Record<string, unknown>;
+  grip: React.ReactNode;
+  errBubble: React.ReactNode;
+  isSel: boolean;
+  isActive: boolean;
+  listId: string | null;
+  index: number;
+}
+
+/** 칸 안의 입력(고르기 · 이름)을 누를 때 블록 고르기·끌기가 시작되지 않게 */
+const stop = (e: React.SyntheticEvent) => e.stopPropagation();
+
+function IfItem({ block: b, cls, rowProps, grip, errBubble, isSel, isActive, listId, index }: ContainerProps<IfBlock>) {
+  const ed = useEditor();
   return (
-    <div className="blist ro-list">
-      <ReadOnlyList blocks={program} />
+    <div className={'brep cnt-logic' + (isActive ? ' live' : '')}>
+      <div className={cls} {...rowProps} data-head="1">
+        {grip}
+        <span className="blk-ico">
+          <Icon name="branch" size={22} />
+        </span>
+        <span className="blk-label">만약 이 칸이</span>
+        <select
+          className="cond-pick"
+          aria-label="조건"
+          value={b.cond}
+          onPointerDown={stop}
+          onClick={stop}
+          onKeyDown={stop}
+          onChange={(e) => ed.setCond(b.id, e.target.value as IfCond)}
+        >
+          {(Object.keys(COND_LABEL) as IfCond[]).map((c) => (
+            <option key={c} value={c}>
+              {COND_LABEL[c]}
+            </option>
+          ))}
+        </select>
+        {isSel && <BlockTools id={b.id} />}
+      </div>
+      {errBubble}
+      <div className="brep-body">
+        <BlockList blocks={b.body} listId={b.id} slot="yes" />
+      </div>
+      {b.elseBody && (
+        <>
+          {/* "아니면" 줄: 여기에 놓으면 아니면 칸의 맨 앞에 들어가요 */}
+          <div className="brep-mid" data-slot data-list={b.id + ELSE_SUFFIX} data-index={0}>
+            아니면
+          </div>
+          <div className="brep-body">
+            <BlockList blocks={b.elseBody} listId={b.id + ELSE_SUFFIX} slot="no" />
+          </div>
+        </>
+      )}
+      <div className="brep-foot" data-row data-foot="1" data-list={listId ?? ''} data-index={index} />
     </div>
   );
 }
 
-function ReadOnlyList({ blocks }: { blocks: Program }) {
+function DefineItem({ block: b, cls, rowProps, grip, errBubble, isSel, isActive, listId, index }: ContainerProps<DefineBlock>) {
+  const ed = useEditor();
+  return (
+    <div className={'brep cnt-func' + (isActive ? ' live' : '')}>
+      <div className={cls} {...rowProps} data-head="1">
+        {grip}
+        <span className="blk-ico">
+          <Icon name="magic" size={22} />
+        </span>
+        <span className="blk-label">나만의 블록</span>
+        <input
+          className="name-pick"
+          aria-label="나만의 블록 이름"
+          value={b.name}
+          maxLength={DEFINE_NAME_MAX}
+          onPointerDown={stop}
+          onClick={stop}
+          onKeyDown={stop}
+          onChange={(e) => ed.setName(b.id, e.target.value)}
+        />
+        {isSel && <BlockTools id={b.id} />}
+      </div>
+      {errBubble}
+      <div className="brep-body">
+        <BlockList blocks={b.body} listId={b.id} slot="define" />
+      </div>
+      <div className="brep-foot" data-row data-foot="1" data-list={listId ?? ''} data-index={index} />
+    </div>
+  );
+}
+
+/** 읽기 전용 블록 목록 (정답 예시 보기용) */
+export function BlockListView({ program }: { program: Program }) {
+  const names = new Map(program.filter((b): b is DefineBlock => b.type === 'define').map((d) => [d.id, d.name]));
+  return (
+    <div className="blist ro-list">
+      <ReadOnlyList blocks={program} nameOf={(id) => names.get(id) ?? '나만의 블록'} />
+    </div>
+  );
+}
+
+function ReadOnlyList({ blocks, nameOf }: { blocks: Program; nameOf: NameOf }) {
   return (
     <>
-      {blocks.map((b) =>
-        b.type === 'repeat' ? (
-          <div key={b.id} className="brep ro">
-            <div className="blk blk-repeat">
-              <span className="blk-ico">
-                <Icon name="loop" size={20} />
-              </span>
-              <span className="blk-label">
-                <b className="times-ro">{b.times}</b>번 반복하기
-              </span>
-            </div>
-            <div className="brep-body">
-              <div className="blist">
-                <ReadOnlyList blocks={b.body} />
+      {blocks.map((b) => {
+        if (b.type === 'repeat' || b.type === 'if' || b.type === 'define') {
+          const variant = b.type === 'repeat' ? 'cnt-repeat' : b.type === 'if' ? 'cnt-logic' : 'cnt-func';
+          return (
+            <div key={b.id} className={'brep ro ' + variant}>
+              <div className={'blk blk-' + blockCls(b)}>
+                <span className="blk-ico">
+                  <Icon name={blockIcon(b)} size={20} />
+                </span>
+                <span className="blk-label">
+                  {b.type === 'repeat' ? (
+                    <>
+                      <b className="times-ro">{b.times}</b>번 반복하기
+                    </>
+                  ) : (
+                    blockLabel(b, nameOf)
+                  )}
+                </span>
               </div>
+              <div className="brep-body">
+                <div className="blist">
+                  <ReadOnlyList blocks={b.body} nameOf={nameOf} />
+                </div>
+              </div>
+              {b.type === 'if' && b.elseBody && (
+                <>
+                  <div className="brep-mid">아니면</div>
+                  <div className="brep-body">
+                    <div className="blist">
+                      <ReadOnlyList blocks={b.elseBody} nameOf={nameOf} />
+                    </div>
+                  </div>
+                </>
+              )}
+              <div className="brep-foot" />
             </div>
-            <div className="brep-foot" />
-          </div>
-        ) : (
+          );
+        }
+        return (
           <div key={b.id} className={'blk ro blk-' + blockCls(b)}>
             <span className="blk-ico">
               <Icon name={blockIcon(b)} size={20} />
             </span>
             {b.type === 'color' && <span className="sw" style={{ background: colorHex(b.color) }} />}
-            <span className="blk-label">{blockLabel(b)}</span>
+            <span className="blk-label">{blockLabel(b, nameOf)}</span>
           </div>
-        ),
-      )}
+        );
+      })}
     </>
   );
 }

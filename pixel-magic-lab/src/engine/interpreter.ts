@@ -1,4 +1,4 @@
-import type { Block, ColorKey, Grid, LoopFrame, Program, RunError, RunOptions, RunResult, Step } from './types';
+import type { Block, ColorKey, DefineBlock, Grid, LoopFrame, Program, RunError, RunOptions, RunResult, Step } from './types';
 import { DEFAULT_PEN_COLOR, colorName } from './palette';
 import { MAX_NEST_DEPTH } from './program';
 
@@ -17,7 +17,17 @@ export const ERROR_TEXT = {
   repeatTooSmall: '반복 횟수는 1번 이상이어야 해요.',
   tooManySteps: '명령이 너무 많이 실행돼서 마법이 잠깐 멈췄어요. 반복 횟수를 줄여볼까요?',
   tooDeep: `반복 안의 반복은 ${MAX_NEST_DEPTH}겹까지만 쓸 수 있어요.`,
+  missingDefine: '이 나만의 블록은 만든 곳이 없어요. [나만의 블록 만들기]가 지워졌는지 살펴볼까요?',
+  selfCall: '나만의 블록 안에서 자기 자신을 부를 수는 없어요. 끝없이 돌아서 마법이 멈추지 않거든요!',
 };
+
+/** [다음 색으로]가 따라가는 무지개 순서. 다른 색에서 시작하면 빨강부터. */
+export const RAINBOW: ColorKey[] = ['R', 'O', 'Y', 'G', 'S', 'B', 'P'];
+
+export function nextColor(c: ColorKey): ColorKey {
+  const i = RAINBOW.indexOf(c);
+  return RAINBOW[(i + 1) % RAINBOW.length];
+}
 
 const DIR_DELTA = {
   up: [0, -1],
@@ -51,11 +61,24 @@ export function runProgram(program: Program, opts: RunOptions): RunResult {
   let x = opts.startX ?? 0;
   let y = opts.startY ?? 0;
   let color: ColorKey = opts.startColor ?? DEFAULT_PEN_COLOR;
+  let pen = false;
   const steps: Step[] = [];
   const loops: LoopFrame[] = [];
+  /** 나만의 블록: 가장 바깥에 있는 [만들기] 블록들 */
+  const defs = new Map<string, DefineBlock>();
+  for (const b of program) if (b.type === 'define') defs.set(b.id, b);
+  /** 지금 실행 중인 나만의 블록들 (자기 자신 부르기 막기) */
+  const calling: string[] = [];
 
-  const push = (s: Omit<Step, 'index' | 'x' | 'y' | 'color' | 'loops'>) => {
-    steps.push({ ...s, index: steps.length, x, y, color, loops: loops.map((l) => ({ ...l })) });
+  const push = (s: Omit<Step, 'index' | 'x' | 'y' | 'color' | 'loops' | 'pen'>) => {
+    steps.push({ ...s, index: steps.length, x, y, color, pen, loops: loops.map((l) => ({ ...l })) });
+  };
+  /** 지금 칸을 칠하고 바뀐 내용을 돌려줘요 */
+  const paintHere = () => {
+    const i = y * width + x;
+    const before = grid[i];
+    grid[i] = color;
+    return { index: i, before, after: color };
   };
 
   const fail = (error: RunError): never => {
@@ -85,14 +108,49 @@ export function runProgram(program: Program, opts: RunOptions): RunResult {
           }
           x = nx;
           y = ny;
-          push({ kind: 'move', blockId: b.id });
+          // 펜이 내려가 있으면 지나가는 칸을 칠해요
+          push({ kind: 'move', blockId: b.id, change: pen ? paintHere() : undefined });
+          break;
+        }
+        case 'next': {
+          color = nextColor(color);
+          push({ kind: 'color', blockId: b.id });
+          break;
+        }
+        case 'pen': {
+          pen = b.down;
+          // 펜을 내리는 순간 지금 칸도 칠해져요
+          push({ kind: 'pen', blockId: b.id, change: pen ? paintHere() : undefined });
+          break;
+        }
+        case 'if': {
+          if (depth + 1 > MAX_NEST_DEPTH) fail({ code: 'too-deep', blockId: b.id, message: ERROR_TEXT.tooDeep });
+          const filled = grid[y * width + x] !== null;
+          const yes = b.cond === 'empty' ? !filled : filled;
+          push({ kind: 'check', blockId: b.id, check: yes });
+          if (yes) exec(b.body, depth + 1);
+          else if (b.elseBody) exec(b.elseBody, depth + 1);
+          break;
+        }
+        case 'define':
+          // 만들기 블록은 실행 중에 만나면 그냥 지나가요 (쓰기 블록이 부를 때만 실행)
+          break;
+        case 'call': {
+          const def = defs.get(b.defId);
+          if (!def) fail({ code: 'missing-define', blockId: b.id, message: ERROR_TEXT.missingDefine });
+          if (calling.includes(b.defId)) fail({ code: 'self-call', blockId: b.id, message: ERROR_TEXT.selfCall });
+          if (calling.length >= MAX_NEST_DEPTH) fail({ code: 'too-deep', blockId: b.id, message: ERROR_TEXT.tooDeep });
+          push({ kind: 'call', blockId: b.id });
+          calling.push(b.defId);
+          try {
+            exec(def!.body, 0);
+          } finally {
+            calling.pop();
+          }
           break;
         }
         case 'paint': {
-          const i = y * width + x;
-          const before = grid[i];
-          grid[i] = color;
-          push({ kind: 'paint', blockId: b.id, change: { index: i, before, after: color } });
+          push({ kind: 'paint', blockId: b.id, change: paintHere() });
           break;
         }
         case 'erase': {
@@ -166,6 +224,12 @@ export function describeStep(s: Step): string {
       const l = s.loops[s.loops.length - 1];
       return l ? `반복 ${l.iter}번째 (모두 ${l.total}번)` : '반복';
     }
+    case 'pen':
+      return s.pen ? `펜을 내렸어요. 지나가는 칸이 ${colorName(s.color)}색으로 칠해져요` : '펜을 올렸어요. 이제 움직여도 칠하지 않아요';
+    case 'check':
+      return s.check ? '조건이 맞아요! 안쪽 블록을 실행해요' : '조건이 맞지 않아요';
+    case 'call':
+      return '나만의 블록을 실행해요';
     case 'error':
       return s.error?.message ?? '오류';
   }

@@ -86,5 +86,30 @@ await page.waitForTimeout(300);
 await shot('11-gallery');
 await page.keyboard.press('Escape');
 
+// 새 미션: 선생님 도구로 모두 열고 18번(만약), 21번(나만의 블록) 보기
+await page
+  .getByRole('navigation', { name: '모드 선택' })
+  .getByRole('button', { name: /마법 따라 그리기/ })
+  .click();
+await page.getByRole('button', { name: '선생님 도구' }).click();
+await page.getByText('모든 미션 바로 열기').click();
+await page.keyboard.press('Escape');
+for (const [id, name] of [
+  [18, '12-mission18'],
+  [21, '13-mission21'],
+  [24, '14-mission24'],
+]) {
+  await page.getByRole('button', { name: /미션 지도/ }).click();
+  await page.getByRole('button', { name: new RegExp('^미션 ' + id + ' ') }).click();
+  const ok = page.getByRole('button', { name: '알겠어요!' });
+  if (await ok.isVisible().catch(() => false)) await ok.click();
+  await page.waitForTimeout(250);
+  await shot(name);
+}
+await page.getByRole('button', { name: /미션 지도/ }).click();
+await page.waitForTimeout(300);
+await shot('15-mission-map-24');
+await page.keyboard.press('Escape');
+
 await browser.close();
 console.log(`${out}/ 에 ${tag} 화면을 저장했어요`);

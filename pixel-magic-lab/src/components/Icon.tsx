@@ -17,6 +17,12 @@ export type IconName =
   | 'play'
   | 'pause'
   | 'step'
+  | 'stepBack'
+  | 'penDown'
+  | 'penUp'
+  | 'rainbow'
+  | 'branch'
+  | 'magic'
   | 'restart'
   | 'clear'
   | 'star'
@@ -87,6 +93,46 @@ const P: Record<IconName, ReactElement> = {
     <>
       <path d="M5.5 6.2v11.6a.7.7 0 0 0 1.1.6l8.6-5.8a.7.7 0 0 0 0-1.2L6.6 5.6a.7.7 0 0 0-1.1.6z" />
       <path d="M19 5.5v13" />
+    </>
+  ),
+  stepBack: (
+    <>
+      <path d="M18.5 6.2v11.6a.7.7 0 0 1-1.1.6l-8.6-5.8a.7.7 0 0 1 0-1.2l8.6-5.8a.7.7 0 0 1 1.1.6z" />
+      <path d="M5 5.5v13" />
+    </>
+  ),
+  penDown: (
+    <>
+      <path d="m14.5 4.5 5 5L9 20H4v-5z" />
+      <path d="M4 22h16" />
+    </>
+  ),
+  penUp: (
+    <>
+      <path d="m15.5 2.5 4 4L11 15H7v-4z" />
+      <path d="M4 21h4m4 0h4m4 0h0" />
+    </>
+  ),
+  rainbow: (
+    <>
+      <path d="M3 17a9 9 0 0 1 18 0" />
+      <path d="M7 17a5 5 0 0 1 10 0" />
+      <path d="M11 17a1 1 0 0 1 2 0" />
+    </>
+  ),
+  branch: (
+    <>
+      <path d="M12 3v6" />
+      <path d="M12 9 6 15v5" />
+      <path d="m12 9 6 6v5" />
+      <circle cx="12" cy="3" r="0.5" />
+    </>
+  ),
+  magic: (
+    <>
+      <path d="M4 20 14 10" />
+      <path d="m15 3 1 2.5L18.5 6.5 16 7.5 15 10l-1-2.5L11.5 6.5 14 5.5z" />
+      <path d="M19 12v3m-1.5-1.5h3" />
     </>
   ),
   restart: (

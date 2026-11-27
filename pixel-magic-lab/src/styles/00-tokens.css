@@ -56,6 +56,16 @@
   --erase-bd: #8f8cb0;
   --erase-sh: #d3d1e4;
   --erase-ink: #4b4970;
+  /* 만약 (생각하는 블록): 연보라 */
+  --logic: #ece7ff;
+  --logic-bd: #8a6cf2;
+  --logic-sh: #d3c9fb;
+  --logic-ink: #4a2fb3;
+  /* 나만의 블록: 주황 */
+  --func: #ffeadb;
+  --func-bd: #f2853a;
+  --func-sh: #f8caa6;
+  --func-ink: #8f3f07;
 
   /* 글자 크기 (최소 14px) */
   --fs-xs: 14px;

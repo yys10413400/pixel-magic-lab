@@ -5,8 +5,8 @@ import { PixelCanvas, PixelThumb, type DiffMark } from '../components/PixelCanva
 import { RunControls, StatusBar, Modal, Stars, Stamp, type ConfirmState } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { WizardGuide, WizardSprite } from '../components/Wizard';
-import { useRunner } from '../components/useRunner';
-import { MISSION_DATA, getMission, starsFor, DIFFICULTY_LABEL, DIFFICULTY_GRADE, titleFor } from '../data/missions';
+import { useRunner, canStepBack } from '../components/useRunner';
+import { MISSION_DATA, getMission, starsFor, DIFFICULTY_LABEL, DIFFICULTY_GRADE, CHAPTERS, titleFor } from '../data/missions';
 import { countBlocks, parseProgram, cloneProgram, usesRepeat } from '../engine/program';
 import { diffGrids } from '../engine/interpreter';
 import type { Program, RunResult } from '../engine/types';
@@ -115,7 +115,15 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
     }
   };
 
-  const runner = useRunner({ width: mission.width, height: mission.height, program, speed, onFinish, resetKey: missionId });
+  const runner = useRunner({
+    width: mission.width,
+    height: mission.height,
+    base: mission.base,
+    program,
+    speed,
+    onFinish,
+    resetKey: missionId,
+  });
   const { view } = runner;
 
   // 다른 모드로 가면 실행 멈춤
@@ -272,6 +280,12 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
             }
             runner.step();
           }}
+          onStepBack={() => {
+            setDiff(null);
+            setFeedback(null);
+            runner.stepBack();
+          }}
+          canStepBack={canStepBack(view)}
           onReset={() => {
             runner.reset();
             setDiff(null);
@@ -354,13 +368,17 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
         icon={<Icon name="map" size={24} />}
       >
         <MissionTrail currentId={mission.id} records={progress.missions} isUnlocked={isUnlocked} onPick={goMission} />
-        <p className="trail-legend">
-          {(['easy', 'normal', 'challenge'] as const).map((d) => (
-            <span key={d}>
-              <span className={'diff-chip d-' + d}>{DIFFICULTY_LABEL[d]}</span> {DIFFICULTY_GRADE[d]}
-            </span>
-          ))}
-        </p>
+        <ul className="trail-legend">
+          {CHAPTERS.map((c) => {
+            const ids = MISSION_DATA.filter((m) => m.chapter === c.id).map((m) => m.id);
+            return (
+              <li key={c.id}>
+                <span className={'diff-chip d-' + c.difficulty}>{DIFFICULTY_GRADE[c.difficulty]}</span>
+                <b>{c.title}</b> 미션 {ids[0]}~{ids[ids.length - 1]} · {c.learn}
+              </li>
+            );
+          })}
+        </ul>
         <p className="note center">미션을 성공하면 다음 미션이 열려요. 선생님 도구에서 모든 미션을 열 수 있어요.</p>
       </Modal>
 
@@ -378,7 +396,7 @@ export function MissionMode({ active, progress, setProgress, speed, setSpeed, as
         }
       >
         <div className="concept-body">
-          <ConceptArt id={mission.id} />
+          <ConceptArt rows={mission.concept?.art} />
           <p>{mission.concept?.text}</p>
         </div>
       </Modal>
@@ -488,20 +506,14 @@ function SparkleBurst() {
   );
 }
 
-/** 새 개념 소개 그림 (작은 픽셀 그림으로 개념을 보여줌) */
-function ConceptArt({ id }: { id: number }) {
-  const arts: Record<number, string[]> = {
-    1: ['.....', '.....', '..P..', '.....', '.....'],
-    2: ['.....', 'PPPPP', '.....'],
-    3: ['R....', 'RO...', '.OY..', '..YG.'],
-    5: ['.K.K.', '.KKK.', '..K..'],
-    6: ['RRRRRRR', 'OOOOOOO', 'YYYYYYY'],
-    8: ['Y.Y.Y.Y', '.Y.Y.Y.'],
-    11: ['BBBBB', 'B...B', 'BBBBB'],
-    12: ['K.K.K.', '.K.K.K', 'K.K.K.'],
-  };
-  const rows = arts[id];
-  if (!rows) return null;
+/** 새 개념 소개 그림 (작은 픽셀 그림으로 개념을 보여줌). 그림이 없으면 마법사가 나와요. */
+function ConceptArt({ rows }: { rows?: string[] }) {
+  if (!rows)
+    return (
+      <div className="concept-art wizard">
+        <WizardSprite size={84} />
+      </div>
+    );
   const w = rows[0].length;
   const grid = rows
     .join('')
@@ -517,7 +529,7 @@ function ConceptArt({ id }: { id: number }) {
 const TRAIL_COLS = 4;
 
 /**
- * 미션 지도: 12개 미션을 지그재그 길로 이어요.
+ * 미션 지도: 24개 미션을 지그재그 길로 이어요. (한 줄 = 4개, 1장은 두 줄, 2~5장은 한 줄씩)
  * 한 줄에 4개씩, 둘째 줄은 오른쪽에서 왼쪽으로 가서 길이 끊기지 않아요.
  * 마법사는 지금 미션 위에 서 있어요.
  */

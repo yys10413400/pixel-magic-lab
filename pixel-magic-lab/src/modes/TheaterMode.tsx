@@ -30,6 +30,7 @@ interface Props {
   speed: SpeedKey;
   setSpeed: (s: SpeedKey) => void;
   ask: (c: ConfirmState) => void;
+  advanced: boolean;
 }
 
 const MAX_FRAMES = 40;
@@ -39,7 +40,7 @@ const FPS_OPTIONS: { fps: number; label: string }[] = [
   { fps: 8, label: '빠르게' },
 ];
 
-export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) {
+export function TheaterMode({ active, handleRef, speed, setSpeed, ask, advanced }: Props) {
   const draft = useMemo(() => loadTheaterDraft(), []);
   const [project, setProject] = useState<AnimProject>(() => draft?.project ?? projectFromTemplate(TEMPLATES[0]));
   const [savedId, setSavedId] = useState<string | null>(draft?.savedId ?? null);
@@ -227,6 +228,7 @@ export function TheaterMode({ active, handleRef, speed, setSpeed, ask }: Props) 
   return (
     <div className="mode theater-mode">
       <Studio
+        advanced={advanced}
         active={active}
         size={size}
         program={frame.program}

@@ -173,13 +173,29 @@
   margin-top: 2px;
 }
 .trail-legend {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px 16px;
-  margin: 14px 0 0;
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 6px 18px;
   font-size: var(--fs-xs);
   color: var(--ink-soft);
+}
+.trail-legend li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.trail-legend b {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  color: var(--ink);
+}
+.concept-art.wizard {
+  display: grid;
+  place-items: center;
+  background: var(--spell-ll);
 }
 
 .stamp circle {

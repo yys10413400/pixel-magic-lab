@@ -99,3 +99,39 @@ describe('실행 재생 (Playback)', () => {
     expect(fn).not.toHaveBeenCalled();
   });
 });
+
+describe('되감기 (한 단계 뒤로)', () => {
+  it('실행한 단계를 하나씩 되돌리고, 칠한 칸도 되돌아가요', () => {
+    const { pb, flush } = setup('R paint R paint', { speed: 'instant' });
+    pb.run();
+    flush();
+    expect(pb.getView().grid.filter(Boolean)).toHaveLength(2);
+    pb.stepBack(); // 마지막 색칠 취소
+    expect(pb.getView()).toMatchObject({ status: 'paused', applied: 3, x: 2 });
+    expect(pb.getView().grid.filter(Boolean)).toHaveLength(1);
+    pb.stepBack();
+    pb.stepBack();
+    expect(pb.getView()).toMatchObject({ applied: 1, x: 1 });
+    expect(pb.getView().grid.filter(Boolean)).toHaveLength(0);
+    // 다시 앞으로
+    pb.step();
+    expect(pb.getView()).toMatchObject({ applied: 2 });
+    expect(pb.getView().grid.filter(Boolean)).toHaveLength(1);
+  });
+
+  it('처음 상태에서는 되돌릴 것이 없어요', () => {
+    const { pb } = setup('R paint');
+    expect(pb.canStepBack()).toBe(false);
+    pb.stepBack();
+    expect(pb.getView().applied).toBe(0);
+  });
+
+  it('오류로 멈춘 뒤에도 되감아서 오류 직전을 볼 수 있어요', () => {
+    const { pb, flush } = setup('R R R R R R', { speed: 'instant' });
+    pb.run();
+    flush();
+    expect(pb.getView().status).toBe('error');
+    pb.stepBack();
+    expect(pb.getView()).toMatchObject({ status: 'paused', x: 4 });
+  });
+});

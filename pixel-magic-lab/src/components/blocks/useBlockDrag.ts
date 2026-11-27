@@ -10,7 +10,7 @@ import type { BlockKind, ColorKey } from '../../engine/types';
 //   data-ws     작업 공간 빈 곳 (맨 끝에 붙임)
 // ─────────────────────────────────────────────
 
-export type DragSrc = { type: 'palette'; kind: BlockKind; color?: ColorKey } | { type: 'block'; id: string };
+export type DragSrc = { type: 'palette'; kind: BlockKind | 'call'; color?: ColorKey; defId?: string } | { type: 'block'; id: string };
 export type DropSlot = { listId: string | null; index: number };
 export type Drop = DropSlot | { trash: true };
 

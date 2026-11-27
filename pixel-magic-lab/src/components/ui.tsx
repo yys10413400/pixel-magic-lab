@@ -27,6 +27,8 @@ interface RunControlsProps {
   onPause: () => void;
   onResume: () => void;
   onStep: () => void;
+  onStepBack: () => void;
+  canStepBack: boolean;
   onReset: () => void;
   compact?: boolean;
 }
@@ -45,12 +47,13 @@ export function RunControls(p: RunControlsProps) {
         <Icon name={main.icon} size={24} />
         {main.label}
       </button>
+      {/* 되감기: 한 단계씩 뒤로 가며 어디서 틀렸는지 찾아요 */}
+      <button type="button" className="btn-ctl" onClick={p.onStepBack} disabled={!p.canStepBack} title="한 단계 뒤로 되감아요">
+        <Icon name="stepBack" size={20} />
+        뒤로
+      </button>
       <button type="button" className="btn-ctl" onClick={p.onStep} title="명령을 하나씩 실행해요">
         <Icon name="step" size={20} />한 단계
-      </button>
-      <button type="button" className="btn-ctl" onClick={p.onRun} title="도화지를 비우고 처음부터 다시 실행해요">
-        <Icon name="restart" size={20} />
-        처음부터
       </button>
       <button type="button" className="btn-ctl" onClick={p.onReset} title="실행 결과를 지우고 처음 상태로">
         <Icon name="clear" size={20} />

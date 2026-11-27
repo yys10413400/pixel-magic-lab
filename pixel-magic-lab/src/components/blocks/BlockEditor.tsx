@@ -5,13 +5,19 @@ import {
   cloneBlock,
   countBlocks,
   createBlock,
+  createCall,
+  defines,
   findBlock,
+  findList,
+  isContainer,
   insertBlock,
   listLength,
   locate,
   moveBlock,
   nudgeBlock,
   removeBlock,
+  removeDefine,
+  topLevelOf,
   updateBlock,
   MAX_NEST_DEPTH,
 } from '../../engine/program';
@@ -65,7 +71,7 @@ export function BlockEditor(props: Props) {
   }, [program]);
 
   // 커서/선택이 사라진 블록을 가리키면 정리
-  const validCursor: Cursor = cursor.listId !== null && !findBlock(program, cursor.listId) ? { listId: null, index: null } : cursor;
+  const validCursor: Cursor = cursor.listId !== null && !findList(program, cursor.listId) ? { listId: null, index: null } : cursor;
   const curLen = listLength(program, validCursor.listId);
   const curIndex = validCursor.index === null ? curLen : Math.min(validCursor.index, curLen);
   const selectedValid = selected && findBlock(program, selected) ? selected : null;
@@ -101,20 +107,31 @@ export function BlockEditor(props: Props) {
     const p = programRef.current;
     let listId = at ? at.listId : validCursor.listId;
     let index = at ? at.index : curIndex;
-    if (!canInsert(p, listId, block)) {
-      showToast(`반복 안의 반복은 ${MAX_NEST_DEPTH}겹까지만 넣을 수 있어요. 바깥에 넣었어요.`);
+    // 나만의 블록을 자기 자신의 [만들기] 안에 넣으면 끝없이 돌아요 → 바깥 맨 아래에 넣어요
+    if (block.type === 'call' && topLevelOf(p, listId) === block.defId) {
+      showToast('나만의 블록 안에는 자기 자신을 넣을 수 없어요. 바깥 맨 아래에 넣었어요.');
+      listId = null;
+      index = p.length;
+    } else if (!canInsert(p, listId, block)) {
+      showToast(
+        block.type === 'define'
+          ? '나만의 블록 만들기는 맨 바깥에만 놓을 수 있어요. 맨 아래에 넣었어요.'
+          : `반복 안의 반복은 ${MAX_NEST_DEPTH}겹까지만 넣을 수 있어요. 바깥에 넣었어요.`,
+      );
       listId = null;
       index = p.length;
     }
     commit(insertBlock(p, listId, index, block));
     play('add');
     setSelected(block.id);
-    if (block.type === 'repeat') setCursor({ listId: block.id, index: null });
+    // 그릇 블록을 넣으면 다음 블록은 그 안으로 들어가요
+    if (isContainer(block)) setCursor({ listId: block.id, index: null });
     // 커서가 "맨 끝"을 따라가는 중이면 계속 맨 끝, 아니면 넣은 블록 바로 뒤
     else setCursor({ listId, index: !at && validCursor.index === null ? null : index + 1 });
   };
 
-  const addKind = (kind: BlockKind, color?: ColorKey) => addBlock(createBlock(kind, color));
+  const addKind = (kind: BlockKind | 'call', color?: ColorKey, defId?: string) =>
+    addBlock(kind === 'call' ? createCall(defId!) : createBlock(kind, color));
 
   const nudge = (id: string, dir: -1 | 1) => {
     const p = programRef.current;
@@ -128,7 +145,12 @@ export function BlockEditor(props: Props) {
   const remove = (id: string) => {
     const p = programRef.current;
     const loc = locate(p, id);
-    commit(removeBlock(p, id));
+    // 나만의 블록 만들기를 지우면 그 블록을 쓰는 곳도 함께 지워요
+    const isDef = findBlock(p, id)?.type === 'define';
+    const next = isDef ? removeDefine(p, id) : removeBlock(p, id);
+    if (isDef && countBlocks(next) < countBlocks(p) - countBlocks([findBlock(p, id)!]))
+      showToast('이 나만의 블록을 쓰던 곳도 함께 지웠어요.');
+    commit(next);
     play('erase');
     setSelected(null);
     if (loc) setCursor({ listId: loc.listId, index: loc.index });
@@ -158,7 +180,7 @@ export function BlockEditor(props: Props) {
       return;
     }
     if (d.src.type === 'palette') {
-      addBlock(createBlock(d.src.kind, d.src.color), drop);
+      addBlock(d.src.kind === 'call' ? createCall(d.src.defId!) : createBlock(d.src.kind, d.src.color), drop);
       return;
     }
     const p = programRef.current;
@@ -210,6 +232,10 @@ export function BlockEditor(props: Props) {
     return () => window.removeEventListener('pointerdown', close);
   }, [colorFor]);
 
+  // 나만의 블록: 이름표와 팔레트에 보여 줄 목록
+  const myBlocks = useMemo(() => defines(program), [program]);
+  const defNames = useMemo(() => new Map(myBlocks.map((d) => [d.id, d.name.trim()])), [myBlocks]);
+
   const loops = useMemo(() => new Map((props.loops ?? []).map((l) => [l.blockId, l])), [props.loops]);
   const dragging = !!drag?.active;
   const dropTarget = dragging && drag.drop && !isTrash(drag.drop) ? drag.drop : null;
@@ -238,6 +264,9 @@ export function BlockEditor(props: Props) {
     duplicate,
     remove,
     setTimes: (id, times) => commit(updateBlock(programRef.current, id, { times })),
+    setCond: (id, cond) => commit(updateBlock(programRef.current, id, { cond })),
+    setName: (id, name) => commit(updateBlock(programRef.current, id, { name })),
+    nameOf: (defId) => defNames.get(defId) || '나만의 블록',
     setColor: (id, color) => {
       commit(updateBlock(programRef.current, id, { color }));
       setColorFor(null);
@@ -254,7 +283,14 @@ export function BlockEditor(props: Props) {
     // 키보드 단축키(Delete, Alt+↑/↓)를 편집기 안 어디서든 받기 위한 묶음
     // oxlint-disable-next-line jsx-a11y/no-static-element-interactions
     <div className="block-editor" onKeyDown={onKeyDown}>
-      <BlockPalette kinds={kinds} trashMode={trashMode} suppressClick={suppressClick} onAdd={addKind} onBeginDrag={beginPointer} />
+      <BlockPalette
+        kinds={kinds}
+        defines={kinds.includes('define') ? myBlocks : []}
+        trashMode={trashMode}
+        suppressClick={suppressClick}
+        onAdd={addKind}
+        onBeginDrag={beginPointer}
+      />
 
       <div className="ws-head">
         <span className="ws-title">

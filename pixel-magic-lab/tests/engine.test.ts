@@ -13,6 +13,10 @@ import {
   canInsert,
   updateBlock,
   findBlock,
+  findList,
+  removeDefine,
+  cloneProgram,
+  ELSE_SUFFIX,
 } from '../src/engine/program';
 import type { Program, RepeatBlock } from '../src/engine/types';
 
@@ -282,5 +286,106 @@ describe('블록 옮기기 (nudgeBlock)', () => {
     p = nudgeBlock(p, outer2.id, -1);
     // 4겹이 되므로 안으로 들어가지 않고 앞으로 자리만 바꿔요
     expect(locate(p, outer2.id)).toEqual({ listId: null, index: 0 });
+  });
+});
+
+describe('새 블록: 다음 색으로 · 펜 · 만약 · 나만의 블록', () => {
+  const W = 5;
+  const go = (src: string, base?: string[]) =>
+    runProgram(parseProgram(src), {
+      width: W,
+      height: 1,
+      base: base
+        ? base
+            .join('')
+            .split('')
+            .map((c) => (c === '.' ? null : c))
+        : undefined,
+    });
+  const row = (src: string, base?: string[]) => gridToRows(go(src, base).finalGrid, W)[0];
+
+  it('다음 색으로: 무지개 순서로 바뀌고, 보라 다음은 빨강', () => {
+    expect(row('next paint R next paint R next paint R next paint R next paint')).toBe('ROYGS');
+    expect(row('color:B next paint R next paint R next paint')).toBe('PRO..');
+    expect(row('color:K next paint')).toBe('R....'); // 무지개에 없는 색에서는 빨강부터
+  });
+
+  it('펜 내리기: 지금 칸과 지나가는 칸을 칠하고, 펜 올리기 뒤에는 칠하지 않아요', () => {
+    expect(row('pendown R R penup R R')).toBe('PPP..');
+    expect(row('R penup R pendown R')).toBe('..PP.');
+  });
+
+  it('만약 비어 있으면 / 칠해져 있으면', () => {
+    expect(row('color:Y if:empty[paint] R if:empty[paint]', ['.K...'])).toBe('YK...');
+    expect(row('R if:filled[erase] R if:filled[erase]', ['.KK..'])).toBe('.....');
+  });
+
+  it('만약 ~ 아니면: 맞으면 위 칸, 아니면 아니면 칸', () => {
+    expect(row('repeat:4[ifelse:empty[paint][erase] R] ifelse:empty[paint][erase]', ['P.P.P'])).toBe('.P.P.');
+  });
+
+  it('만약 블록은 살펴본 결과를 기록에 남겨요 (화면에 보여 주려고)', () => {
+    const r = go('if:empty[paint]', ['.....']);
+    expect(r.steps[0]).toMatchObject({ kind: 'check', check: true });
+  });
+
+  it('나만의 블록: 만들기는 지나가고, 쓰기에서 안쪽 블록을 실행해요', () => {
+    expect(row('def:점[paint R R] call:점 call:점 paint')).toBe('P.P.P');
+    // 쓰기 블록이 없으면 아무 일도 없어요
+    expect(row('def:점[paint R R]')).toBe('.....');
+  });
+
+  it('나만의 블록 안에서 자기 자신을 부르면 친절한 오류로 멈춰요', () => {
+    const r = go('def:끝없이[paint call:끝없이] call:끝없이');
+    expect(r.error?.code).toBe('self-call');
+  });
+
+  it('만들기가 없는 나만의 블록을 쓰면 오류', () => {
+    const p: Program = [{ id: 'c1', type: 'call', defId: '없음' }];
+    expect(runProgram(p, { width: 3, height: 1 }).error?.code).toBe('missing-define');
+  });
+});
+
+describe('그릇 블록 편집: 만약 ~ 아니면, 나만의 블록', () => {
+  it('아니면 칸에 넣고, 찾고, 옮길 수 있어요', () => {
+    let p = parseProgram('ifelse:empty[paint][erase] R');
+    const iff = p[0];
+    const r = p[1];
+    p = moveBlock(p, r.id, iff.id + ELSE_SUFFIX, 0);
+    expect(locate(p, r.id)).toEqual({ listId: iff.id + ELSE_SUFFIX, index: 0 });
+    expect(findList(p, iff.id + ELSE_SUFFIX)).toHaveLength(2);
+    expect(countBlocks(p)).toBe(4);
+  });
+
+  it('위로 옮기면 만약 블록의 마지막 칸(아니면)으로 들어가요', () => {
+    let p = parseProgram('ifelse:empty[paint][erase] R');
+    const [iff, r] = p;
+    p = nudgeBlock(p, r.id, -1);
+    expect(locate(p, r.id)?.listId).toBe(iff.id + ELSE_SUFFIX);
+  });
+
+  it('나만의 블록 만들기는 가장 바깥에만 넣을 수 있어요', () => {
+    const p = parseProgram('repeat:2[R]');
+    const def = createBlock('define');
+    expect(canInsert(p, p[0].id, def)).toBe(false);
+    expect(canInsert(p, null, def)).toBe(true);
+  });
+
+  it('만들기를 지우면 쓰는 곳도 함께 지워지고, 프로그램을 복제하면 쓰기가 새 만들기를 가리켜요', () => {
+    const p = parseProgram('def:점[paint] call:점 repeat:2[call:점]');
+    expect(countBlocks(removeDefine(p, p[0].id))).toBe(1); // 빈 반복만 남아요
+    const copy = cloneProgram(p);
+    expect(copy[1].type === 'call' && copy[1].defId).toBe(copy[0].id);
+  });
+
+  it('저장된 데이터 복원: 새 블록도 그대로, 이상한 값은 걸러요', () => {
+    const p = parseProgram('next pendown ifelse:filled[R][L] def:별[paint] call:별');
+    expect(sanitizeProgram(JSON.parse(JSON.stringify(p)))).toEqual(p);
+    const bad = sanitizeProgram([
+      { type: 'if', cond: '이상함', body: [] },
+      { type: 'define', name: '', body: [] },
+    ]);
+    expect(bad[0]).toMatchObject({ type: 'if', cond: 'empty', elseBody: null });
+    expect(bad[1]).toMatchObject({ type: 'define', name: '나만의 마법' });
   });
 });

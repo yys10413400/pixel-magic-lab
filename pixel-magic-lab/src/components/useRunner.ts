@@ -5,6 +5,7 @@ import { play } from '../lib/sound';
 // 실행 재생 컨트롤러(Playback)를 React 화면에 연결하는 훅
 export { SPEED_LABEL, SPEED_MS } from '../lib/playback';
 export type { RunStatus, RunnerView } from '../lib/playback';
+import type { RunnerView } from '../lib/playback';
 
 interface Options extends PlaybackOptions {
   /** 이 값이 바뀌면 (미션·도화지 크기 변경 등) 처음 상태로 돌아가요 */
@@ -43,6 +44,7 @@ export function useRunner(opts: Options) {
     pause: core.pause,
     resume: core.resume,
     step: core.step,
+    stepBack: core.stepBack,
     reset: core.reset,
     invalidate: core.invalidate,
     setGrid: core.setGrid,
@@ -51,3 +53,8 @@ export function useRunner(opts: Options) {
 }
 
 export type Runner = ReturnType<typeof useRunner>;
+
+/** [뒤로]를 누를 수 있는지: 실행한 단계가 있고, 코드가 바뀌기 전의 기록일 때 */
+export function canStepBack(view: RunnerView): boolean {
+  return view.applied > 0 && view.status !== 'idle';
+}

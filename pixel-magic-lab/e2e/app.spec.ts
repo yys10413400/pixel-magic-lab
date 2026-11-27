@@ -23,7 +23,7 @@ test.describe('미션', () => {
     await page.getByRole('button', { name: /실행하기/ }).click();
     await expect(page.getByRole('heading', { name: '미션 성공!' })).toBeVisible({ timeout: 10_000 });
     await page.reload();
-    const progress = await page.evaluate(() => JSON.parse(localStorage.getItem('pml.progress.v1') ?? '{}'));
+    const progress = await page.evaluate(() => JSON.parse(localStorage.getItem('pml.progress.v2') ?? '{}'));
     expect(progress.missions['1'].stars).toBe(3);
   });
 

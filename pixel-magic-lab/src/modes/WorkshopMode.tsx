@@ -28,6 +28,7 @@ interface Props {
   speed: SpeedKey;
   setSpeed: (s: SpeedKey) => void;
   ask: (c: ConfirmState) => void;
+  advanced: boolean;
 }
 
 interface Snap {
@@ -36,7 +37,7 @@ interface Snap {
   base: Grid;
 }
 
-export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props) {
+export function WorkshopMode({ active, handleRef, speed, setSpeed, ask, advanced }: Props) {
   const draft = useMemo(() => loadWorkshopDraft(), []);
   const [savedId, setSavedId] = useState<string | null>(draft?.savedId ?? null);
   const [name, setName] = useState(draft?.name ?? '');
@@ -260,6 +261,7 @@ export function WorkshopMode({ active, handleRef, speed, setSpeed, ask }: Props)
   return (
     <div className="mode workshop-mode">
       <Studio
+        advanced={advanced}
         active={active}
         size={size}
         program={program}

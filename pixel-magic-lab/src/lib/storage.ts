@@ -10,7 +10,9 @@ import { migrateProgram, schemaOf, SCHEMA } from './migrations';
 // ─────────────────────────────────────────────
 
 const KEYS = {
-  progress: 'pml.progress.v1',
+  // 미션이 24개로 새로 바뀌면서 v2 (예전 v1 기록은 새 미션과 맞지 않아요)
+  progress: 'pml.progress.v2',
+  oldProgress: 'pml.progress.v1',
   works: 'pml.works.v1',
   anims: 'pml.anims.v1',
   settings: 'pml.settings.v1',
@@ -56,12 +58,14 @@ function sanitizeSize(n: unknown): number {
 export interface Settings {
   muted: boolean;
   speed: SpeedKey;
+  /** 공방·극장에서 고급 블록(만약, 나만의 블록) 보이기 — 선생님 도구에서 켜요 */
+  advanced: boolean;
 }
 export type SpeedKey = 'slow' | 'normal' | 'fast' | 'instant';
 export function loadSettings(): Settings {
   const s = read<Partial<Settings>>(KEYS.settings, {});
   const speed: SpeedKey = s.speed === 'slow' || s.speed === 'fast' || s.speed === 'instant' ? s.speed : 'normal';
-  return { muted: !!s.muted, speed };
+  return { muted: !!s.muted, speed, advanced: !!s.advanced };
 }
 export function saveSettings(s: Settings) {
   write(KEYS.settings, s);
@@ -106,6 +110,21 @@ export function loadProgress(): Progress {
     lastMission: typeof p.lastMission === 'number' ? p.lastMission : 1,
   };
 }
+/**
+ * 예전 미션(12개) 기록이 남아 있으면 지우고 true 를 돌려줘요. (한 번만 안내하려고)
+ * 공방 작품과 애니메이션은 건드리지 않아요.
+ */
+export function takeOldProgressNotice(): boolean {
+  try {
+    const ls = globalThis.localStorage;
+    if (!ls?.getItem(KEYS.oldProgress)) return false;
+    ls.removeItem(KEYS.oldProgress);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function saveProgress(p: Progress) {
   write(KEYS.progress, p);
 }

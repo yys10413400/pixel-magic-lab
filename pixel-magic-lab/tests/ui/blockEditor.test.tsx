@@ -5,7 +5,22 @@ import userEvent from '@testing-library/user-event';
 import { BlockEditor } from '../../src/components/blocks/BlockEditor';
 import type { BlockKind, Program } from '../../src/engine/types';
 
-const ALL: BlockKind[] = ['up', 'down', 'left', 'right', 'paint', 'erase', 'color', 'repeat'];
+const ALL: BlockKind[] = [
+  'up',
+  'down',
+  'left',
+  'right',
+  'paint',
+  'erase',
+  'color',
+  'repeat',
+  'next',
+  'penDown',
+  'penUp',
+  'if',
+  'ifElse',
+  'define',
+];
 
 function Harness({ onProgram }: { onProgram?: (p: Program) => void }) {
   const [program, setProgram] = useState<Program>([]);
@@ -101,5 +116,33 @@ describe('블록 편집기', () => {
     await user.click(screen.getByRole('button', { name: /색 고르기/ }));
     await user.click(within(screen.getByRole('group', { name: '물감 고르기' })).getByRole('button', { name: '파랑' }));
     expect(last[0].type === 'color' && last[0].color).toBe('B');
+  });
+
+  it('나만의 블록: 만들고 이름을 바꾸면 블록 상자에 그 이름의 블록이 생기고, 누르면 들어가요', async () => {
+    const user = userEvent.setup();
+    let last: Program = [];
+    render(<Harness onProgram={(p) => (last = p)} />);
+    await user.click(screen.getByRole('button', { name: '나만의 블록 만들기' }));
+    await user.click(screen.getByRole('button', { name: '색칠하기' })); // 만들기 안으로 들어가요
+    const name = screen.getByRole('textbox', { name: '나만의 블록 이름' });
+    await user.clear(name);
+    await user.type(name, '점');
+    expect(last[0]).toMatchObject({ type: 'define', name: '점' });
+    expect(last[0].type === 'define' && last[0].body.map((b) => b.type)).toEqual(['paint']);
+    // 커서가 [만들기] 안에 있어도, 자기 자신 안에는 넣지 않고 바깥 맨 아래에 넣어요
+    await user.click(screen.getByRole('button', { name: '점' }));
+    expect(last[1]).toMatchObject({ type: 'call', defId: last[0].id });
+    expect(last[0].type === 'define' && last[0].body).toHaveLength(1);
+    expect(screen.getByRole('status')).toHaveTextContent('자기 자신을 넣을 수 없어요');
+  });
+
+  it('만약 ~ 아니면: 조건을 바꾸고, 아니면 칸이 있어요', async () => {
+    const user = userEvent.setup();
+    let last: Program = [];
+    render(<Harness onProgram={(p) => (last = p)} />);
+    await user.click(screen.getByRole('button', { name: '만약 ~ 아니면' }));
+    await user.selectOptions(screen.getByRole('combobox', { name: '조건' }), '칠해져 있으면');
+    expect(last[0]).toMatchObject({ type: 'if', cond: 'filled', elseBody: [] });
+    expect(screen.getByText('아닐 때 할 일을 넣어요')).toBeInTheDocument();
   });
 });

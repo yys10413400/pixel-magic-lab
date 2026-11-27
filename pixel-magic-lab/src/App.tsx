@@ -11,6 +11,7 @@ import {
   resetProgress,
   saveProgress,
   saveSettings,
+  takeOldProgressNotice,
   type Progress,
   type Settings,
   type SpeedKey,
@@ -38,6 +39,8 @@ export default function App() {
   const [confirm, setConfirm] = useState<ConfirmState | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   const [teacherOpen, setTeacherOpen] = useState(false);
+  // 예전 미션 기록이 있었으면 한 번 안내해요
+  const [newMissionsNotice, setNewMissionsNotice] = useState(() => takeOldProgressNotice());
   const [isFull, setIsFull] = useState(false);
   const workshopRef = useRef<ModeHandle | null>(null);
   const theaterRef = useRef<ModeHandle | null>(null);
@@ -168,10 +171,24 @@ export default function App() {
           />
         </div>
         <div className="mode-pane" hidden={mode !== 'workshop'}>
-          <WorkshopMode active={mode === 'workshop'} handleRef={workshopRef} speed={settings.speed} setSpeed={setSpeed} ask={ask} />
+          <WorkshopMode
+            active={mode === 'workshop'}
+            handleRef={workshopRef}
+            speed={settings.speed}
+            setSpeed={setSpeed}
+            ask={ask}
+            advanced={settings.advanced}
+          />
         </div>
         <div className="mode-pane" hidden={mode !== 'theater'}>
-          <TheaterMode active={mode === 'theater'} handleRef={theaterRef} speed={settings.speed} setSpeed={setSpeed} ask={ask} />
+          <TheaterMode
+            active={mode === 'theater'}
+            handleRef={theaterRef}
+            speed={settings.speed}
+            setSpeed={setSpeed}
+            ask={ask}
+            advanced={settings.advanced}
+          />
         </div>
       </main>
 
@@ -185,6 +202,26 @@ export default function App() {
         icon={<Icon name="help" size={24} />}
       >
         <HelpContent />
+      </Modal>
+
+      <Modal
+        open={newMissionsNotice && mode === 'mission'}
+        onClose={() => setNewMissionsNotice(false)}
+        title="미션이 새로 바뀌었어요"
+        icon={<Icon name="map" size={24} />}
+        footer={
+          <button type="button" className="btn btn-primary" data-autofocus onClick={() => setNewMissionsNotice(false)}>
+            새 미션 시작하기
+          </button>
+        }
+      >
+        <div className="concept-body">
+          <WizardSprite size={84} />
+          <p>
+            미션이 24개로 새로 바뀌었어요! 새 블록(다음 색으로, 펜, 만약, 나만의 블록)과 되감기가 생겼어요. 예전 미션의 별 기록은 새 미션과
+            맞지 않아서 지웠어요. 공방 작품과 애니메이션은 그대로 있어요.
+          </p>
+        </div>
       </Modal>
 
       <Modal
@@ -207,6 +244,16 @@ export default function App() {
               모든 미션 바로 열기 (잠금 해제)
             </label>
             <p className="note">수업 진도에 맞춰 원하는 미션으로 바로 이동할 수 있어요. 미션 화면의 [미션 지도]에서 고르세요.</p>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={settings.advanced}
+                onChange={(e) => setSettings((s) => ({ ...s, advanced: e.target.checked }))}
+              />
+              <span className="sw-track" />
+              공방·극장에서 고급 블록 쓰기
+            </label>
+            <p className="note">[만약 ~라면] [만약 ~ 아니면] [나만의 블록 만들기]가 블록 상자에 나와요. 5~6학년 수업에 알맞아요.</p>
             <button type="button" className="btn" onClick={toggleFull}>
               <Icon name="expand" size={18} /> 전체 화면으로 보기
             </button>
@@ -325,7 +372,11 @@ function HelpContent() {
             펜은 보라색으로 출발해요. 미션에서는 왼쪽 위 (0,0)에서, 자유 공방과 픽셀 극장에서는 도화지 가운데(8×8이면 (4,4))에서 출발해요.
             처음 칸은 저절로 칠해지지 않아요.
           </li>
-          <li>[색칠하기]를 실행할 때만 칸이 칠해지고, 이동 블록은 펜만 옮겨요.</li>
+          <li>[색칠하기]를 실행할 때만 칸이 칠해지고, 이동 블록은 펜만 옮겨요. 단, [펜 내리기]를 하면 지나가는 칸이 칠해져요.</li>
+          <li>[다음 색으로]는 빨 주 노 초 하늘 파 보 순서로 색을 바꿔요.</li>
+          <li>[만약] 블록은 펜이 있는 칸이 비었는지 살펴보고 맞을 때만 안쪽 블록을 실행해요.</li>
+          <li>[나만의 블록 만들기]에 블록을 넣고 이름을 붙이면, 블록 상자에 그 이름의 새 블록이 생겨요.</li>
+          <li>[◀ 뒤로]를 누르면 실행을 한 단계씩 되돌려서 틀린 곳을 찾을 수 있어요.</li>
           <li>실행할 때마다 도화지는 깨끗하게 다시 시작해요.</li>
           <li>도화지 밖으로 나가려 하면 마법이 멈추고, 문제가 된 블록에 빨간 표시가 생겨요.</li>
         </ul>

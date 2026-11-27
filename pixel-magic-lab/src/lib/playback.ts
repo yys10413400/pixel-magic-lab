@@ -207,6 +207,20 @@ export class Playback {
     this.commit(this.finishIfDone(this.applyNext({ ...v, status: 'paused' }, true)));
   };
 
+  /** 되감기: 기록이 있으면 한 단계 뒤로 가요. 처음부터 한 단계 전까지 다시 적용해서 언제나 정확해요. */
+  canStepBack = () => this.trace !== null && this.view.applied > 0;
+
+  stepBack = () => {
+    const t = this.trace;
+    if (!t || this.view.applied === 0) return;
+    this.stopTimer();
+    const target = this.view.applied - 1;
+    let v: RunnerView = { ...initialView(this.getOpts()), status: 'paused', total: t.steps.length };
+    while (v.applied < target) v = this.applyNext(v, false);
+    this.deps.sound('move');
+    this.commit(v);
+  };
+
   /** 처음 상태로 (도화지 초기화) */
   reset = () => {
     this.stopTimer();

@@ -128,7 +128,7 @@
   transform: translateY(3px);
   box-shadow: 0 0 0 var(--sh);
 }
-.pal-blk.k-repeat {
+.pal-blk.wide {
   grid-column: span 2;
   flex-direction: row;
   gap: 8px;
@@ -509,7 +509,7 @@
   margin-left: 0;
   min-height: 34px;
   position: relative;
-  border-left: 16px solid var(--repeat-bd);
+  border-left: 16px solid var(--arm, var(--repeat-bd));
 }
 .brep.live > .brep-body {
   border-left-color: var(--gold);
@@ -517,9 +517,9 @@
 .brep-foot {
   height: 16px;
   width: 110px;
-  background: var(--repeat-bd);
+  background: var(--arm, var(--repeat-bd));
   border-radius: 0 0 12px 12px;
-  box-shadow: 0 3px 0 var(--repeat-sh);
+  box-shadow: 0 3px 0 var(--arm-sh, var(--repeat-sh));
 }
 .brep.live > .brep-foot {
   background: var(--gold);
@@ -540,8 +540,8 @@
   width: fit-content;
   min-height: 34px;
   font-size: var(--fs-xs);
-  color: var(--repeat-ink);
-  border: 2px dashed var(--repeat-bd);
+  color: var(--ink-soft);
+  border: 2px dashed var(--arm, var(--repeat-bd));
   background: rgba(255, 255, 255, 0.85);
   border-radius: 999px;
   padding: 4px 12px;
@@ -633,4 +633,89 @@
   padding: 0 6px;
   margin-right: 2px;
   border-radius: 6px;
+}
+
+/* ── 새 블록 종류 색 ── */
+.blk-logic {
+  --bg: var(--logic);
+  --bd: var(--logic-bd);
+  --sh: var(--logic-sh);
+  --ic: var(--logic-ink);
+}
+.blk-func {
+  --bg: var(--func);
+  --bd: var(--func-bd);
+  --sh: var(--func-sh);
+  --ic: var(--func-ink);
+}
+
+/* 그릇 블록 팔 색: 반복 민트 · 만약 연보라 · 나만의 블록 주황 */
+.cnt-repeat {
+  --arm: var(--repeat-bd);
+  --arm-sh: var(--repeat-sh);
+}
+.cnt-logic {
+  --arm: var(--logic-bd);
+  --arm-sh: var(--logic-sh);
+}
+.cnt-func {
+  --arm: var(--func-bd);
+  --arm-sh: var(--func-sh);
+}
+
+/* 만약 블록의 "아니면" 줄 */
+.brep-mid {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  min-width: 120px;
+  min-height: 30px;
+  padding: 2px 14px;
+  background: var(--arm);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+  border-radius: 0 12px 12px 0;
+}
+.brep.live > .brep-mid {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+/* 만약 블록의 조건 고르기, 나만의 블록 이름 칸 */
+.cond-pick,
+.name-pick {
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 12px;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-sm);
+}
+.cond-pick {
+  padding-right: 8px;
+}
+.name-pick {
+  width: 8.5em;
+}
+.name-pick:focus,
+.cond-pick:focus {
+  outline: 3px solid var(--spell);
+  outline-offset: 1px;
+}
+
+/* 팔레트: 내가 만든 블록 */
+.pal-calls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.pal-calls .pal-blk {
+  flex-direction: row;
+  gap: 6px;
+  min-height: 44px;
+  padding: 4px 14px;
 }

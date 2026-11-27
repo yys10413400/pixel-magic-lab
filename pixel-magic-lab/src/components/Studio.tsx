@@ -3,7 +3,7 @@ import { BlockEditor } from './blocks/BlockEditor';
 import { PixelCanvas } from './PixelCanvas';
 import { RunControls, StatusBar } from './ui';
 import { Icon } from './Icon';
-import { useRunner } from './useRunner';
+import { useRunner, canStepBack } from './useRunner';
 import { runProgram, centerOf } from '../engine/interpreter';
 import { PALETTE } from '../engine/palette';
 import type { BlockKind, ColorKey, Grid, Program } from '../engine/types';
@@ -17,7 +17,9 @@ import { onRadioKeys, radioProps } from './radio';
 // 그림 = 손 그림 층(밑그림) 위에 코드를 실행한 결과
 // ─────────────────────────────────────────────
 
-const ALL_KINDS: BlockKind[] = ['up', 'down', 'left', 'right', 'paint', 'erase', 'color', 'repeat'];
+/** 공방·극장 블록: 기본 + 다음 색 + 펜. 고급(만약, 나만의 블록)은 선생님 도구에서 켜면 보여요. */
+const BASIC_KINDS: BlockKind[] = ['up', 'down', 'left', 'right', 'paint', 'erase', 'color', 'repeat', 'next', 'penDown', 'penUp'];
+const ADVANCED_KINDS: BlockKind[] = [...BASIC_KINDS, 'if', 'ifElse', 'define'];
 
 export type Tool = 'code' | 'brush' | 'eraser';
 
@@ -37,6 +39,8 @@ interface Props {
   workspaceTitle?: string;
   canvasLabel?: string;
   compactControls?: boolean;
+  /** 고급 블록(만약, 나만의 블록) 보이기 */
+  advanced?: boolean;
 }
 
 export function Studio(p: Props) {
@@ -97,7 +101,7 @@ export function Studio(p: Props) {
         <BlockEditor
           program={p.program}
           onChange={changeProgram}
-          kinds={ALL_KINDS}
+          kinds={p.advanced ? ADVANCED_KINDS : BASIC_KINDS}
           activeId={running ? view.current?.blockId : null}
           errorId={errorId}
           errorMessage={view.status === 'error' ? view.error?.message : null}
@@ -194,6 +198,8 @@ export function Studio(p: Props) {
             setTool('code');
             runner.step();
           }}
+          onStepBack={runner.stepBack}
+          canStepBack={canStepBack(view)}
           onReset={runner.reset}
           compact={p.compactControls}
         />
