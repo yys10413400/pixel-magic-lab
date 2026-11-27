@@ -10,27 +10,6 @@ import { colorHex } from '../engine/palette';
 
 const C = 10; // 칸 하나의 크기 (SVG 단위)
 
-/** 네 귀퉁이를 계단처럼 한 칸(s) 깎은 사각형 경로 (픽셀 모서리) */
-function steppedRect(x: number, y: number, w: number, h: number, s: number): string {
-  const r = x + w;
-  const b = y + h;
-  return [
-    `M${x + s} ${y}`,
-    `H${r - s}`,
-    `V${y + s}`,
-    `H${r}`,
-    `V${b - s}`,
-    `H${r - s}`,
-    `V${b}`,
-    `H${x + s}`,
-    `V${b - s}`,
-    `H${x}`,
-    `V${y + s}`,
-    `H${x + s}`,
-    'Z',
-  ].join(' ');
-}
-
 export interface DiffMark {
   index: number;
   expected: ColorKey | null;
@@ -248,16 +227,21 @@ export function PixelCanvas(props: Props) {
     >
       {frame && (
         <>
-          <path
-            d={steppedRect(-3.5, -3.5, width * C + 7, height * C + 7, 2)}
+          <rect
+            x={-4}
+            y={-4}
+            width={width * C + 8}
+            height={height * C + 8}
+            rx={5}
             className="canvas-frame-shadow"
-            transform="translate(0 2.2)"
+            transform="translate(0 2.4)"
           />
-          <path d={steppedRect(-3.5, -3.5, width * C + 7, height * C + 7, 2)} className="canvas-frame" />
+          <rect x={-4} y={-4} width={width * C + 8} height={height * C + 8} rx={5} className="canvas-frame" />
         </>
       )}
       <g className="cells">{cells}</g>
       <g className="grid-lines">{lines}</g>
+      {frame && <rect x={0} y={0} width={width * C} height={height * C} className="grid-edge" />}
       {axisLabels}
       {diffMarks}
       {pen && (

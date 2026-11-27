@@ -13,8 +13,6 @@
   align-items: center;
   gap: 16px;
   padding: 0 16px;
-  background: var(--sheet);
-  border-bottom: 3px solid var(--ink);
   position: relative;
   z-index: 5;
 }
@@ -28,11 +26,12 @@
 .logo {
   display: grid;
   place-items: center;
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   flex: none;
-  background: var(--spell-ll);
-  border-radius: var(--r-sm);
+  background: var(--sheet);
+  border-radius: 16px;
+  box-shadow: var(--lift);
 }
 .brand-text h1 {
   font-size: var(--fs-xl);
@@ -48,41 +47,47 @@
   white-space: nowrap;
 }
 
-/* 모드 탭: 공책의 색인 탭. 지금 탭은 남색으로 채워져 머리띠 선과 이어져요 */
+/* 모드 탭: 둥근 막대 안에서 고른 탭만 하얗게 떠올라요 */
 .mode-tabs {
   display: flex;
-  align-self: flex-end;
-  gap: 6px;
-  margin: 0 auto -3px;
+  gap: 4px;
+  margin: 0 auto;
+  padding: 5px;
+  background: #e9e5f7;
+  border-radius: 999px;
 }
 .mode-tab {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 50px;
-  padding: 0 18px 0 14px;
-  border: 3px solid var(--ink);
-  border-bottom: 0;
-  border-radius: var(--r-md) var(--r-md) 0 0;
-  background: var(--sheet-2);
+  height: 44px;
+  padding: 0 20px 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
   font-size: var(--fs-md);
   color: var(--ink-soft);
   white-space: nowrap;
-  position: relative;
-  top: 3px;
-  transition: background 0.12s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 .mode-tab:hover {
-  background: var(--spell-ll);
   color: var(--ink);
 }
 .mode-tab.on {
-  background: var(--ink);
-  color: #fff;
-  height: 56px;
+  background: var(--sheet);
+  color: var(--ink);
+  box-shadow: 0 3px 0 #d6d0ec;
 }
 .mode-tab.on .icon {
-  color: var(--gold);
+  color: var(--spell);
+}
+.mode-tab.t-workshop.on .icon {
+  color: var(--paint-bd);
+}
+.mode-tab.t-theater.on .icon {
+  color: var(--repeat-bd);
 }
 
 .top-tools {
@@ -100,7 +105,7 @@
   white-space: nowrap;
   margin-right: 4px;
   background: var(--gold-l);
-  border-radius: var(--r-sm);
+  border-radius: 999px;
 }
 .wizard-badge b {
   font-weight: 400;
@@ -120,24 +125,25 @@
   height: var(--tap);
   display: grid;
   place-items: center;
-  border-radius: var(--r-sm);
-  border: 2px solid var(--rule-2);
+  border-radius: var(--r-md);
+  border: 0;
   background: var(--sheet);
-  color: var(--ink);
+  color: var(--ink-soft);
+  box-shadow: var(--lift);
   flex: none;
 }
 .btn-icon:hover:not(:disabled) {
-  border-color: var(--spell);
   color: var(--spell-d);
 }
 .btn-icon:active:not(:disabled) {
   transform: translateY(2px);
+  box-shadow: 0 1px 0 #e2def2;
 }
 
 .stage-area {
   flex: 1;
   min-height: 0;
-  padding: 12px 12px 10px;
+  padding: 4px 14px 14px;
 }
 .mode-pane {
   height: 100%;

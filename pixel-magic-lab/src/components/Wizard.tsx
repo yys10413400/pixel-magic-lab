@@ -96,7 +96,7 @@ export function WizardGuide({ mood = 'idle', children, live = false, size = 64, 
       <span className="wizard-avatar" key={mood}>
         <WizardSprite mood={mood} size={size} />
       </span>
-      <div className={'wizard-bubble px-frame bubble-' + mood} aria-live={live ? 'polite' : undefined}>
+      <div className={'wizard-bubble bubble-' + mood} aria-live={live ? 'polite' : undefined}>
         {children}
       </div>
     </div>

@@ -38,14 +38,14 @@
 /* ── 픽셀 마법사 안내 ── */
 .wizard-guide {
   flex: none;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: start;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
 }
 .wizard-avatar {
   display: block;
-  padding-top: 6px;
+  margin-left: 10px;
 }
 .wizard-avatar .mood-happy {
   animation: wizardHop 0.6s ease-out;
@@ -54,33 +54,14 @@
   animation: wizardTilt 0.6s ease-out;
 }
 .wizard-bubble {
-  --pc: var(--ink);
-  --ps: rgba(38, 34, 90, 0.14);
   position: relative;
-  margin: 3px 3px 8px 6px;
-  padding: 10px 12px;
-  background: var(--sheet);
+  margin: 0 0 4px;
+  padding: 12px 14px;
+  background: var(--spell-ll);
+  border-radius: 18px 18px 18px 6px;
   font-size: var(--fs-sm);
   line-height: 1.55;
-}
-/* 말풍선 꼬리 (픽셀 계단) */
-.wizard-bubble::before,
-.wizard-bubble::after {
-  content: '';
-  position: absolute;
-  background: var(--pc);
-}
-.wizard-bubble::before {
-  left: -12px;
-  top: 22px;
-  width: 9px;
-  height: 6px;
-}
-.wizard-bubble::after {
-  left: -6px;
-  top: 16px;
-  width: 6px;
-  height: 6px;
+  color: var(--ink);
 }
 .wizard-bubble p {
   margin: 0;
@@ -96,7 +77,6 @@
 }
 .fb-error .wizard-bubble {
   background: var(--danger-l);
-  --pc: var(--danger-d);
 }
 .learn-chip {
   display: inline-flex;
@@ -135,8 +115,9 @@
 /* ── 힌트 ── */
 .hint-box {
   flex: none;
-  border-top: 2px solid var(--rule);
-  padding-top: 10px;
+  background: var(--sheet-2);
+  border-radius: 18px;
+  padding: 10px 12px 12px;
 }
 .hint-head {
   display: flex;
@@ -217,7 +198,8 @@
   height: clamp(90px, 18vh, 150px);
   aspect-ratio: 1;
   align-self: center;
-  border: 2px solid var(--rule-2);
+  border-radius: 14px;
+  box-shadow: 0 0 0 5px #ece7fb;
   overflow: hidden;
   background: #fff;
 }
@@ -241,8 +223,8 @@
   align-items: flex-start;
   gap: 6px;
   background: var(--sheet-2);
-  border-left: 5px solid var(--gold);
-  padding: 10px 12px;
+  border-radius: 18px;
+  padding: 12px 14px;
   color: var(--ink);
 }
 .side-sec.tip p {
@@ -256,7 +238,7 @@
   z-index: 3;
   background: var(--ink);
   color: #fff;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 8px 12px;
   font-size: var(--fs-xs);
   animation: rise 0.25s;
@@ -279,13 +261,8 @@
   aspect-ratio: 1;
   align-self: center;
   background: #fff;
-  margin: 4px;
-  box-shadow:
-    0 -4px 0 0 var(--ink),
-    0 4px 0 0 var(--ink),
-    -4px 0 0 0 var(--ink),
-    4px 0 0 0 var(--ink),
-    0 10px 0 0 rgba(38, 34, 90, 0.18);
+  border-radius: 18px;
+  box-shadow: 0 0 0 6px #e4dcfa;
   overflow: hidden;
 }
 .curtain {
@@ -454,4 +431,12 @@
 }
 .fs-add:hover {
   background: var(--lav-l);
+}
+
+/* 연한 상자 안의 작은 버튼은 흰색으로 띄워요 */
+.hint-box .btn-mini,
+.side-sec.tip .btn-mini {
+  background: var(--sheet);
+  color: var(--spell-dd);
+  box-shadow: 0 2px 0 #e2def2;
 }

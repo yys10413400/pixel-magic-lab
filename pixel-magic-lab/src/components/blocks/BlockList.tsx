@@ -255,7 +255,6 @@ function BlockItem({ block: b, index, listId }: { block: Block; index: number; l
             </span>
           )}
           {isSel && <BlockTools id={b.id} />}
-          <span className="blk-nub" aria-hidden />
         </div>
         {errBubble}
         <div className="brep-body">
@@ -282,7 +281,6 @@ function BlockItem({ block: b, index, listId }: { block: Block; index: number; l
           <span className="blk-label">{blockLabel(b)}</span>
         )}
         {isSel && <BlockTools id={b.id} />}
-        <span className="blk-nub" aria-hidden />
       </div>
       {errBubble}
     </div>

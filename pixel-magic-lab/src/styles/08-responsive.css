@@ -86,6 +86,19 @@
   }
 }
 
+/* 실행 줄이 좁을 때: 속도 글자는 숨기고 (버튼 이름만으로 알 수 있어요) 보조 버튼을 조금 좁게 */
+@media (max-width: 1440px) {
+  .speed-label {
+    display: none;
+  }
+  .btn-ctl {
+    min-width: 60px;
+  }
+  .btn-run {
+    padding: 0 22px 0 18px;
+  }
+}
+
 @media (max-width: 1180px) {
   .brand-text h1 {
     font-size: 19px;

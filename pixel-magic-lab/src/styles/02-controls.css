@@ -8,7 +8,6 @@
 .card {
   position: relative;
   background: var(--sheet);
-  border: 2px solid var(--rule-2);
   border-radius: var(--r-lg);
   box-shadow: var(--soft);
   min-height: 0;
@@ -17,49 +16,48 @@
   flex-direction: column;
 }
 
-/* ── 버튼 ───────────────────────────────
-   .btn          조용한 보조 버튼 (흰 바탕)
-   .btn-primary  화면에서 가장 중요한 한 가지 (보라 픽셀 버튼)
-   .btn-danger   지우기처럼 되돌릴 수 없는 일 (빨강 픽셀 버튼) */
+/* ── 버튼: 말랑한 사탕 ───────────────────────────────
+   .btn          흰 사탕 (보조)
+   .btn-primary  보라 사탕 — 화면에서 가장 중요한 한 가지
+   .btn-danger   빨강 사탕 — 지우기처럼 되돌릴 수 없는 일
+   아래 띠(사탕 그림자)가 눌리면 납작해져요. */
 .btn {
+  --sh: #e2def2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   min-height: var(--tap);
-  padding: 6px 16px;
+  padding: 6px 18px;
   font-size: var(--fs-md);
-  border-radius: var(--r-sm);
-  border: 2px solid var(--rule-2);
+  border-radius: var(--r-md);
+  border: 0;
   background: var(--sheet);
   color: var(--ink);
-  box-shadow: 0 3px 0 var(--rule-2);
+  box-shadow:
+    inset 0 0 0 2px var(--rule),
+    0 3px 0 var(--sh);
   white-space: nowrap;
+  transition: transform 0.08s;
 }
 .btn .icon {
   color: var(--spell);
 }
 .btn:hover:not(:disabled) {
-  border-color: var(--spell);
+  background: var(--spell-ll);
 }
 .btn:active:not(:disabled) {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 var(--rule-2);
+  transform: translateY(3px);
+  box-shadow:
+    inset 0 0 0 2px var(--rule),
+    0 0 0 var(--sh);
 }
 .btn-primary,
 .btn-danger {
-  --pc: var(--spell-dd);
-  border: 0;
-  border-radius: 0;
-  margin: 3px;
+  --sh: var(--spell-dd);
   background: var(--spell);
   color: #fff;
-  box-shadow:
-    0 -3px 0 0 var(--pc),
-    0 3px 0 0 var(--pc),
-    -3px 0 0 0 var(--pc),
-    3px 0 0 0 var(--pc),
-    0 6px 0 0 var(--pc);
+  box-shadow: 0 4px 0 var(--sh);
 }
 .btn-primary .icon,
 .btn-danger .icon {
@@ -69,7 +67,7 @@
   background: var(--spell-d);
 }
 .btn-danger {
-  --pc: var(--danger-d);
+  --sh: var(--danger-d);
   background: var(--danger);
 }
 .btn-danger:hover:not(:disabled) {
@@ -77,19 +75,11 @@
 }
 .btn-primary:active:not(:disabled),
 .btn-danger:active:not(:disabled) {
-  transform: translateY(3px);
-  box-shadow:
-    0 -3px 0 0 var(--pc),
-    0 3px 0 0 var(--pc),
-    -3px 0 0 0 var(--pc),
-    3px 0 0 0 var(--pc);
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--sh);
 }
 .btn-wide {
   width: 100%;
-}
-.btn-primary.btn-wide,
-.btn-danger.btn-wide {
-  width: calc(100% - 6px);
 }
 
 .btn-mini {
@@ -97,25 +87,25 @@
   align-items: center;
   gap: 4px;
   font-size: var(--fs-xs);
-  padding: 3px 10px;
+  padding: 3px 12px;
   min-height: 36px;
-  border-radius: 6px;
-  border: 2px solid var(--rule-2);
-  background: var(--sheet);
-  color: var(--ink);
+  border-radius: 999px;
+  border: 0;
+  background: var(--sheet-2);
+  color: var(--ink-soft);
   white-space: nowrap;
 }
 .btn-mini .icon {
-  color: var(--ink-soft);
+  color: var(--ink-faint);
 }
 .btn-mini:hover:not(:disabled) {
-  border-color: var(--spell);
+  background: var(--spell-l);
+  color: var(--spell-dd);
 }
 .btn-mini.danger {
   color: var(--danger-d);
 }
 .btn-mini.danger:hover:not(:disabled) {
-  border-color: var(--danger);
   background: var(--danger-l);
 }
 
@@ -123,9 +113,8 @@
 .seg {
   display: inline-flex;
   background: var(--sheet-2);
-  border: 2px solid var(--rule);
-  border-radius: var(--r-sm);
-  padding: 2px;
+  border-radius: 999px;
+  padding: 3px;
   gap: 2px;
 }
 .seg button {
@@ -134,8 +123,8 @@
   gap: 5px;
   border: 0;
   background: transparent;
-  border-radius: 6px;
-  padding: 4px 11px;
+  border-radius: 999px;
+  padding: 4px 13px;
   font-size: var(--fs-sm);
   color: var(--ink-soft);
   white-space: nowrap;
@@ -145,23 +134,26 @@
   color: var(--ink);
 }
 .seg button.on {
-  background: var(--ink);
-  color: #fff;
+  background: var(--sheet);
+  color: var(--ink);
+  box-shadow: 0 2px 0 #dcd6ee;
 }
 .seg button.on .icon {
-  color: var(--gold);
+  color: var(--spell);
 }
 
 .sw {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 2px solid rgba(38, 34, 90, 0.3);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px rgba(47, 43, 79, 0.12);
   flex: none;
 }
 .sw.sm {
   width: 14px;
   height: 14px;
+  border-radius: 4px;
 }
 
 .mini-toggle {
@@ -186,24 +178,20 @@
 .diff-chip {
   font-family: var(--font-ui);
   font-size: var(--fs-xs);
-  padding: 1px 9px;
-  border-radius: 4px;
-  border: 2px solid;
+  padding: 2px 10px;
+  border-radius: 999px;
   white-space: nowrap;
 }
 .diff-chip.d-easy {
-  background: #e9f7ee;
-  border-color: #6cbf86;
+  background: #e3f6e9;
   color: #2b6e41;
 }
 .diff-chip.d-normal {
   background: var(--gold-l);
-  border-color: var(--gold-d);
   color: #7a5200;
 }
 .diff-chip.d-challenge {
-  background: var(--spell-ll);
-  border-color: var(--spell);
+  background: var(--spell-l);
   color: var(--spell-dd);
 }
 
@@ -220,30 +208,27 @@
   filter: drop-shadow(0 1.5px 0 var(--gold-d));
 }
 
-/* 저장하기: 주 버튼은 아니지만 자주 쓰여서 보라 테두리로 한 단계 강조 */
+/* 저장하기: 주 버튼은 아니지만 자주 써서 보라 글씨로 한 단계 강조 */
 .btn-save {
-  border-color: var(--spell);
   color: var(--spell-dd);
-  box-shadow: 0 3px 0 var(--spell-l);
+  box-shadow:
+    inset 0 0 0 2px var(--spell-l),
+    0 3px 0 var(--spell-l);
 }
-/* 극장의 [재생]: 지팡이 금색 픽셀 버튼 (마법이 움직이는 순간) */
+/* 극장의 [재생하기]: 노란 사탕 (마법이 움직이는 순간) */
 .btn-accent {
-  --pc: var(--gold-d);
-  border: 0;
-  border-radius: 0;
-  margin: 3px;
+  --sh: var(--gold-d);
   background: var(--gold);
   color: var(--ink);
-  box-shadow:
-    0 -3px 0 0 var(--pc),
-    0 3px 0 0 var(--pc),
-    -3px 0 0 0 var(--pc),
-    3px 0 0 0 var(--pc),
-    0 6px 0 0 var(--pc);
+  box-shadow: 0 4px 0 var(--sh);
 }
 .btn-accent .icon {
   color: var(--ink);
 }
 .btn-accent:hover:not(:disabled) {
-  background: #ffb514;
+  background: #ffbf2e;
+}
+.btn-accent:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 var(--sh);
 }

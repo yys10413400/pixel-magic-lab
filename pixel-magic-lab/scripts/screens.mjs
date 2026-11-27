@@ -63,5 +63,28 @@ await click('저장 없이 이동');
 await page.waitForTimeout(300);
 await shot('07-theater');
 
+// 팝업들
+await page.getByRole('button', { name: /새로 만들기/ }).click();
+await page.waitForTimeout(300);
+await shot('08-templates');
+await page.keyboard.press('Escape');
+await page.getByRole('button', { name: '사용 방법' }).click();
+await page.waitForTimeout(300);
+await shot('09-help');
+await page.keyboard.press('Escape');
+await page.getByRole('button', { name: '선생님 도구' }).click();
+await page.waitForTimeout(300);
+await shot('10-teacher');
+await page.keyboard.press('Escape');
+await page
+  .getByRole('navigation', { name: '모드 선택' })
+  .getByRole('button', { name: /자유 픽셀 공방/ })
+  .click();
+await page.getByRole('button', { name: /^저장하기/ }).click();
+await page.getByRole('button', { name: /작품 보관함/ }).click();
+await page.waitForTimeout(300);
+await shot('11-gallery');
+await page.keyboard.press('Escape');
+
 await browser.close();
 console.log(`${out}/ 에 ${tag} 화면을 저장했어요`);
